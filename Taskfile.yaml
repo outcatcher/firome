@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  _prepare:
+    cmds:
+      - pip install -r requirements.txt
+
+  run:
+    deps:
+      - _prepare
+    cmds:
+      - python -m firome {{.CLI_ARGS}}

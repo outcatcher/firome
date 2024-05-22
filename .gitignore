@@ -1,0 +1,5 @@
+.idea
+.venv
+*.fit
+*.gpx
+*.tcx
