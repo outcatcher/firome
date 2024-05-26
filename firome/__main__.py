@@ -1,6 +1,8 @@
 import argparse
+import logging
 import time
 
+from firome.logging import LOGGER
 from firome.merge import merge
 from firome.export.tcx import export_as_tcx
 
@@ -9,12 +11,16 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--route", type=str, required=True, help="Path to GPX file with route of the training")
 parser.add_argument("--recording", type=str, required=True, help="Path to FIT file with GPS-less data of the training")
 parser.add_argument("--output", choices=["tcx"], default="tcx", help="Output format")
+parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    print("route: ", args.route)
-    print("recording: ", args.recording)
+    LOGGER.info("route: %s", args.route)
+    LOGGER.info("recording: %s", args.recording)
+
+    if args.debug:
+        LOGGER.setLevel(logging.DEBUG)
 
     points = merge(args.route, args.recording)
 
@@ -23,5 +29,4 @@ if __name__ == '__main__':
 
         export_as_tcx(points, output_path)
 
-        print()
-        print("result: ", output_path)
+        LOGGER.info("\nresult: %s", output_path)

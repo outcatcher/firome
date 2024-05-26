@@ -1,5 +1,6 @@
 from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
 
+from ..logging import LOGGER
 from ..types.points import Point
 
 
@@ -21,11 +22,22 @@ def parse_fit(src: str) -> list[Point]:
     return result
 
 
+_LAP = 1
+
+
 def frames_to_point(data: FitDataMessage) -> Point | None:
+    global _LAP  # TODO: в будущем убрать в класс?
+
     if data.frame_type != FIT_FRAME_DATA:
         return None
 
+    if data.has_field("lap_trigger"):
+        _LAP += 1
+
     if not data.has_field("distance"):
+        LOGGER.debug(data.frame_type)
+        LOGGER.debug([field.name for field in data.fields])
+
         return None
 
     return Point(
@@ -34,5 +46,6 @@ def frames_to_point(data: FitDataMessage) -> Point | None:
         speed=data.get_value("speed", fallback=None),
         power=data.get_value("power", fallback=None),
         heart_rate=data.get_value("heart_rate", fallback=None),
-        cadence=data.get_value("cadence")
+        cadence=data.get_value("cadence"),
+        lap=_LAP,
     )

@@ -41,23 +41,35 @@ def export_as_tcx(points: list[Point], destination: str):
     notes = etree.SubElement(activity, with_ns("Notes"))
     notes.text = "Merged by firome"
 
+    lap_i = 0
+    lap_track = None
+
+    for p in points:
+        if p.lap is None:
+            if lap_track is None:
+                continue
+
+            p.lap = lap_i
+
+        if p.lap != lap_i:
+            lap_i = p.lap
+
+            lap_track = new_lap(activity, start_ts)
+
+        append_point(p, lap_track)
+
+    root.getroottree().write(destination, encoding='utf-8', xml_declaration=True)
+
+
+def new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
     lap = etree.SubElement(activity, with_ns("Lap"), {"StartTime": start_ts})
-
-    lap_time = etree.SubElement(lap, with_ns("TotalTimeSeconds"))
-    lap_time.text = str(int((points[-1].timestamp - points[0].timestamp).total_seconds()))
-
-    lap_distance = etree.SubElement(lap, with_ns("DistanceMeters"))
-    lap_distance.text = str(int(points[-1].distance))
 
     lap_trigger_method = etree.SubElement(lap, with_ns("TriggerMethod"))
     lap_trigger_method.text = "Manual"
 
     lap_track = etree.SubElement(lap, with_ns("Track"))
 
-    for p in points:
-        append_point(p, lap_track)
-
-    root.getroottree().write(destination, encoding='utf-8', xml_declaration=True)
+    return lap_track
 
 
 def append_point(point: Point, base_element: etree.ElementBase) -> etree.ElementBase:

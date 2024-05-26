@@ -14,3 +14,4 @@ class Point:
     power: int = None
     heart_rate: int = None
     cadence: int = None
+    lap: int = None
