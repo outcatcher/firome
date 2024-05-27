@@ -20,3 +20,11 @@ tasks:
       - _prepare
     cmds:
       - python -m firome.ui
+
+  build:
+    deps:
+      - _prepare
+    preconditions:
+      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+    cmds:
+      - pyinstaller --onefile --windowed --name firome firome/ui/__main__.py
