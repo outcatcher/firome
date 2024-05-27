@@ -10,3 +10,13 @@ tasks:
       - _prepare
     cmds:
       - python -m firome {{.CLI_ARGS}}
+
+  generate:
+    cmds:
+      - pyside6-uic firome/ui/assets/main.ui -o firome/ui/main_ui.py
+
+  ui:
+    deps:
+      - _prepare
+    cmds:
+      - python -m firome.ui
