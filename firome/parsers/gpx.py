@@ -20,7 +20,7 @@ def parse_gpx(src: str) -> list[Point]:
     prev = None
 
     for point in track_points:
-        position = (point.attrib["lat"], point.attrib["lon"])
+        position = (float(point.attrib["lat"]), float(point.attrib["lon"]))
 
         elevation_element: etree.ElementBase = point.find("./" + add_ns("ele", default_ns))
 
