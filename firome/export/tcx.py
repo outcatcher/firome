@@ -99,10 +99,7 @@ def append_point(point: Point, base_element: etree.ElementBase) -> etree.Element
     result = etree.SubElement(base_element, with_ns("Trackpoint"))
 
     # <Time>2014-11-30T05:51:36Z</Time>
-    p_time = etree.SubElement(
-        result,
-        with_ns("Time"),
-    )
+    p_time = etree.SubElement(result, with_ns("Time"))
     p_time.text = point.timestamp.astimezone(timezone.utc).strftime(time_format)
 
     #   <Position>
