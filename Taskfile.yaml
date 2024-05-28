@@ -27,7 +27,15 @@ tasks:
     preconditions:
       - pip install pyinstaller  # TODO: use tox or other dependency splitting
     cmds:
-      - pyinstaller --onefile --windowed --name firome firome/ui/__main__.py
+      - pyinstaller --onefile --console --name firome firome/__main__.py
+
+  build-ui:
+    deps:
+      - _prepare
+    preconditions:
+      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+    cmds:
+      - pyinstaller --onefile --windowed --name firome-ui firome/ui/__main__.py
 
   lint:
     preconditions:
