@@ -11,6 +11,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+      - name: Install Task
+        uses: arduino/setup-task@v2
       - name: Run lint
         run: |
           task lint
