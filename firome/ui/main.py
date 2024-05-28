@@ -1,6 +1,6 @@
 import time
 
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QMainWindow, QFileDialog
 
 from firome.export.tcx import export_as_tcx
 from firome.merge import merge
@@ -8,7 +8,6 @@ from firome.ui.main_ui import Ui_MainWindow  # TODO: load directly from .ui file
 
 
 class MainWindow(QMainWindow):
-
     def on_select_activity_click(self):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)

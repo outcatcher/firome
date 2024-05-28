@@ -1,8 +1,7 @@
-import dataclasses
 from typing import Optional
 
-from lxml import etree
 from geopy.distance import geodesic
+from lxml import etree
 
 from ..types.points import Point, Position
 
@@ -15,9 +14,7 @@ def parse_gpx(src: str) -> list[Point]:
     default_ns = root.nsmap[None]
 
     track_points: list[etree.ElementBase] = root.findall(
-        "./" + add_ns("trk", default_ns) +
-        "/" + add_ns("trkseg", default_ns) +
-        "/" + add_ns("trkpt", default_ns)
+        "./" + add_ns("trk", default_ns) + "/" + add_ns("trkseg", default_ns) + "/" + add_ns("trkpt", default_ns)
     )
 
     prev = None

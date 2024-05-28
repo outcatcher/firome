@@ -14,8 +14,7 @@ def merge(route_path: str, recording_path: str) -> list[Point]:
     last_timestamp = data_elements[0].timestamp
 
     while d_i < len(data_elements):
-        if (p_i < len(position_elements) and
-                position_elements[p_i].distance < data_elements[d_i].distance):
+        if p_i < len(position_elements) and position_elements[p_i].distance < data_elements[d_i].distance:
             # допущение, ожидаемое число точек на треке намного меньше точек из FIT файла
             position_elements[p_i].timestamp = last_timestamp
             result.append(position_elements[p_i])
