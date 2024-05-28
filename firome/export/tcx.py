@@ -25,9 +25,10 @@ def export_as_tcx(points: list[Point], destination: str):
     start_ts = points[0].timestamp.strftime(time_format)
 
     root_attrs = {
-        etree.QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation"):
-            "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
-            "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+        etree.QName(
+            "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation"
+        ): "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
+        "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
     }
     root: ElementBase = etree.Element(with_ns("TrainingCenterDatabase"), root_attrs, nsmap=namespaces)
 
@@ -58,7 +59,7 @@ def export_as_tcx(points: list[Point], destination: str):
 
         append_point(p, lap_track)
 
-    root.getroottree().write(destination, encoding='utf-8', xml_declaration=True)
+    root.getroottree().write(destination, encoding="utf-8", xml_declaration=True)
 
 
 def new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
@@ -75,30 +76,30 @@ def new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
 def append_point(point: Point, base_element: etree.ElementBase) -> etree.ElementBase:
     """Trackpoint example
 
-      <Trackpoint>
-        <Time>2014-11-30T05:51:36Z</Time>
-        <Position>
-          <LatitudeDegrees>51.791013</LatitudeDegrees>
-          <LongitudeDegrees>39.199698</LongitudeDegrees>
-        </Position>
-        <AltitudeMeters>152</AltitudeMeters>
-        <DistanceMeters>149567728363.23</DistanceMeters>
-        <HeartRateBpm>
-         <Value>168</Value>
-        </HeartRateBpm>
-        <Cadence>90</Cadence>
-        <Extensions>
-          <ns3:TPX>
-            <ns3:Speed>0</ns3:Speed>
-            <ns3:Watts>135</ns3:Watts>
-          </ns3:TPX>
-        </Extensions>
-      </Trackpoint>
+    <Trackpoint>
+      <Time>2014-11-30T05:51:36Z</Time>
+      <Position>
+        <LatitudeDegrees>51.791013</LatitudeDegrees>
+        <LongitudeDegrees>39.199698</LongitudeDegrees>
+      </Position>
+      <AltitudeMeters>152</AltitudeMeters>
+      <DistanceMeters>149567728363.23</DistanceMeters>
+      <HeartRateBpm>
+       <Value>168</Value>
+      </HeartRateBpm>
+      <Cadence>90</Cadence>
+      <Extensions>
+        <ns3:TPX>
+          <ns3:Speed>0</ns3:Speed>
+          <ns3:Watts>135</ns3:Watts>
+        </ns3:TPX>
+      </Extensions>
+    </Trackpoint>
     """
     result = etree.SubElement(base_element, with_ns("Trackpoint"))
 
     # <Time>2014-11-30T05:51:36Z</Time>
-    p_time = etree.SubElement(result, with_ns("Time"), )
+    p_time = etree.SubElement(result, with_ns("Time"))
     p_time.text = point.timestamp.astimezone(timezone.utc).strftime(time_format)
 
     #   <Position>

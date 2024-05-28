@@ -28,3 +28,15 @@ tasks:
       - pip install pyinstaller  # TODO: use tox or other dependency splitting
     cmds:
       - pyinstaller --onefile --windowed --name firome firome/ui/__main__.py
+
+  lint:
+    preconditions:
+      - pip install ruff  # TODO: use tox or other dependency splitting
+    cmds:
+      - ruff check
+
+  format:
+    preconditions:
+      - pip install ruff  # TODO: use tox or other dependency splitting
+    cmds:
+      - ruff format
