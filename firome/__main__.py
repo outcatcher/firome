@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("--route", type=str, required=True, help="Path to GPX file with route of the training")
 parser.add_argument("--recording", type=str, required=True, help="Path to FIT file with GPS-less data of the training")
+parser.add_argument("--precision", type=float, default=1.0, help="Precision of interpolation, meters")
 parser.add_argument("--output", choices=["tcx"], default="tcx", help="Output format")
 parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     if args.debug:
         LOGGER.setLevel(logging.DEBUG)
 
-    points = merge(args.route, args.recording)
+    points = merge(args.route, args.recording, args.precision)
 
     if args.output == "tcx":
         output_path = f"{int(time.time())}.tcx"

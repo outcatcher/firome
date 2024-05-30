@@ -1,10 +1,10 @@
 from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
 
 from ..logging import LOGGER
-from ..types.points import Point
+from ..types.points import DataPoint
 
 
-def parse_fit(src: str) -> list[Point]:
+def parse_fit(src: str) -> list[DataPoint]:
     if not src.lower().endswith(".fit"):
         raise Exception("unsupported file type")
 
@@ -25,7 +25,7 @@ def parse_fit(src: str) -> list[Point]:
 _LAP = 1
 
 
-def frames_to_point(data: FitDataMessage) -> Point | None:
+def frames_to_point(data: FitDataMessage) -> DataPoint | None:
     global _LAP  # TODO: в будущем убрать в класс?
 
     if data.frame_type != FIT_FRAME_DATA:
@@ -40,7 +40,7 @@ def frames_to_point(data: FitDataMessage) -> Point | None:
 
         return None
 
-    return Point(
+    return DataPoint(
         timestamp=data.get_value("timestamp"),
         distance=data.get_value("distance"),
         speed=data.get_value("speed", fallback=None),

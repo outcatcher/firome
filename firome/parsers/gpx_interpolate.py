@@ -22,41 +22,54 @@
 #
 # Original implementation:
 # https://github.com/remisalmon/gpx-interpolate/blob/00af3c636d566d049f6a140c093af4e91d0482d5/gpx_interpolate.py
-# TODO: rewrite without list-dict-list conversions
-from datetime import tzinfo
 from typing import Dict, List, Union
 
-# TODO: get rid of numpy and scipy, they're bloating binary
 import numpy as np
 from scipy.interpolate import pchip_interpolate
 
 from firome.logging import LOGGER
-from firome.types.points import Point
+from firome.types.points import PositionPoint
 
 # types
-GPXData = Dict[str, Union[List[float], tzinfo, None]]
+GPXData = Dict[str, Union[List[float], None]]
 
 # globals
-EARTH_RADIUS = 6371e3  # meters
-EPS = 1e-6  # seconds
+_EARTH_RADIUS = 6371e3  # meters
+_EPS = 1e-6  # seconds
+
+_fields = ("lat", "lon", "ele", "dist")
 
 
-# functions
-def gpx_interpolate(gpx_data: GPXData, res: float = 5.0) -> GPXData:
+def interpolate(track: list[PositionPoint], resolution: float) -> list[PositionPoint]:
+    """
+    Interpolates track with given resolution (m)
+    """
+    gpx_data = __from_track(track)
+    gpx_data_nodup = __gpx_remove_duplicates(gpx_data)
+
+    if not len(gpx_data_nodup["lat"]) == len(gpx_data["lat"]):
+        LOGGER.warn("Removed {} duplicate trackpoint(s)".format(len(gpx_data["lat"]) - len(gpx_data_nodup["lat"])))
+
+    gpx_data_interp = __gpx_interpolate(gpx_data_nodup, resolution)
+
+    return __to_track(gpx_data_interp)
+
+
+def __gpx_interpolate(gpx_data: GPXData, res: float = 5.0) -> GPXData:
     """
     Returns gpx_data interpolated with a spatial resolution res using piecewise cubic Hermite splines.
 
     if num is passed, gpx_data is interpolated to num points and res is ignored.
     """
 
-    if all(gpx_data[i] in (None, []) for i in ("lat", "lon", "ele", "dist")):
+    if all(gpx_data[i] in (None, []) for i in _fields):
         return gpx_data
 
-    _gpx_data = gpx_remove_duplicates(gpx_data)
-    _gpx_dist = gpx_calculate_distance(_gpx_data, use_ele=True)
+    _gpx_data = __gpx_remove_duplicates(gpx_data)
+    _gpx_dist = __gpx_calculate_distance(_gpx_data, use_ele=True)
 
     xi = np.cumsum(_gpx_dist)
-    yi = np.array([_gpx_data[i] for i in ("lat", "lon", "ele", "dist") if _gpx_data[i]])
+    yi = np.array([_gpx_data[i] for i in _fields if _gpx_data[i]])
 
     num = int(np.ceil(xi[-1] / res))
 
@@ -73,7 +86,7 @@ def gpx_interpolate(gpx_data: GPXData, res: float = 5.0) -> GPXData:
     return gpx_data_interp
 
 
-def gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[float]:
+def __gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[float]:
     """
     Returns the distance between GPX trackpoints.
 
@@ -95,7 +108,7 @@ def gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[floa
             np.sqrt(np.sin(delta_lat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(delta_lon / 2.0) ** 2)
         )  # haversine formula
 
-        dist_latlon = EARTH_RADIUS * c  # great-circle distance
+        dist_latlon = _EARTH_RADIUS * c  # great-circle distance
 
         if gpx_data["ele"] and use_ele:
             dist_ele = gpx_data["ele"][i + 1] - gpx_data["ele"][i]
@@ -107,31 +120,32 @@ def gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[floa
     return gpx_dist.tolist()
 
 
-def gpx_remove_duplicates(gpx_data: GPXData) -> GPXData:
+def __gpx_remove_duplicates(gpx_data: GPXData) -> GPXData:
     """
     Returns gpx_data where duplicate trackpoints are removed.
     """
 
-    gpx_dist = gpx_calculate_distance(gpx_data, use_ele=False)
+    gpx_dist = __gpx_calculate_distance(gpx_data, use_ele=False)
 
     i_dist = np.concatenate(([0], np.nonzero(gpx_dist)[0]))  # keep gpx_dist[0] = 0.0
 
     if len(i_dist) == len(gpx_dist):
         return gpx_data
 
-    gpx_data_nodup = {"lat": [], "lon": [], "ele": [], "dist": []}
+    gpx_data_nodup = dict.fromkeys(_fields, [])
 
-    for k in ("lat", "lon", "ele", "dist"):
+    for k in _fields:
         gpx_data_nodup[k] = [gpx_data[k][i] for i in i_dist] if gpx_data[k] else None
 
     return gpx_data_nodup
 
 
-def from_track(track: list[Point]) -> GPXData:
+def __from_track(track: list[PositionPoint]) -> GPXData:
     """
     Returns a GPXData structure from a GPX file.
     """
 
+    # for some reason `dict.fromkeys(_fields, [])` not working, scipy tries to allocate a lot of data (40G+)
     gpx_data = {"lat": [], "lon": [], "ele": [], "dist": []}
 
     for point in track:
@@ -143,7 +157,7 @@ def from_track(track: list[Point]) -> GPXData:
     return gpx_data
 
 
-def to_track(gpx_data: GPXData) -> list[Point]:
+def __to_track(gpx_data: GPXData) -> list[PositionPoint]:
     gpx_track = []
 
     for i in range(len(gpx_data["lat"])):
@@ -152,22 +166,8 @@ def to_track(gpx_data: GPXData) -> list[Point]:
         dist = gpx_data["dist"][i]
         ele = gpx_data["ele"][i] if gpx_data["ele"] else None
 
-        gpx_point = Point(position=(lat, lon), elevation=ele, distance=dist)
+        gpx_point = PositionPoint(position=(lat, lon), elevation=ele, distance=dist)
 
         gpx_track.append(gpx_point)
 
     return gpx_track
-
-
-# main
-def interpolate(track: list[Point], res=10.0) -> list[Point]:
-    gpx_data = from_track(track)
-
-    gpx_data_nodup = gpx_remove_duplicates(gpx_data)
-
-    if not len(gpx_data_nodup["lat"]) == len(gpx_data["lat"]):
-        LOGGER.warn("Removed {} duplicate trackpoint(s)".format(len(gpx_data["lat"]) - len(gpx_data_nodup["lat"])))
-
-    gpx_data_interp = gpx_interpolate(gpx_data_nodup, res)
-
-    return to_track(gpx_data_interp)

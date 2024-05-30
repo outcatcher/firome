@@ -3,10 +3,10 @@ from typing import Optional
 from geopy.distance import geodesic
 from lxml import etree
 
-from ..types.points import Point, Position
+from ..types.points import DataPoint, Position, PositionPoint
 
 
-def parse_gpx(src: str) -> list[Point]:
+def parse_gpx(src: str) -> list[PositionPoint]:
     result = []
 
     root: etree.ElementBase = etree.parse(src).getroot()
@@ -24,7 +24,7 @@ def parse_gpx(src: str) -> list[Point]:
 
         elevation_element: etree.ElementBase = point.find("./" + add_ns("ele", default_ns))
 
-        gpx_point = Point(
+        gpx_point = PositionPoint(
             position=position,
             distance=total_distance(position, prev),
             elevation=float(elevation_element.text),
@@ -40,7 +40,7 @@ def add_ns(tag, ns):
     return f"{{{ns}}}{tag}"
 
 
-def total_distance(current: Position, previous: Optional[Point]) -> float:
+def total_distance(current: Position, previous: Optional[PositionPoint]) -> float:
     if previous is None:
         return 0
 

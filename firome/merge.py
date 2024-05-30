@@ -1,34 +1,35 @@
+import math
+
 from .parsers.fit import parse_fit
 from .parsers.gpx import parse_gpx
 from .parsers.gpx_interpolate import interpolate
-from .types.points import Point
+from .types.points import DataPoint, PositionPoint
 
 
-def merge(route_path: str, recording_path: str) -> list[Point]:
-    position_elements = interpolate(parse_gpx(route_path), 5.0)
+def merge(route_path: str, recording_path: str, precision: float) -> list[DataPoint]:
+    """Merges positions into data recording"""
+
+    position_elements = interpolate(parse_gpx(route_path), precision)
 
     data_elements = parse_fit(recording_path)
 
-    p_i = d_i = 0
-    # todo: возможно, придётся пре-аллоцировать память, если будут большие файлы
-    result = []  # [None] * (len(position_elements)+len(data_elements))
+    _merge(position_elements, data_elements, precision)
 
-    last_point = data_elements[0]
+    return data_elements
 
-    while d_i < len(data_elements):
-        if p_i < len(position_elements) and position_elements[p_i].distance < data_elements[d_i].distance:
-            # align position data with activity data
-            position_elements[p_i].timestamp = last_point.timestamp
-            position_elements[p_i].speed = last_point.speed
-            position_elements[p_i].power = last_point.power
-            position_elements[p_i].cadence = last_point.cadence
-            position_elements[p_i].heart_rate = last_point.heart_rate
-            result.append(position_elements[p_i])
-            p_i += 1
 
-        result.append(data_elements[d_i])
-        last_point = data_elements[d_i]
+def _merge(position_elements: list[PositionPoint], data_elements: list[DataPoint], precision: float):
+    p_start = d_i = 0
+
+    p_len = len(position_elements)
+    d_len = len(data_elements)
+
+    while d_i < d_len:
+        for p_i in range(p_start, p_len):
+            if math.isclose(position_elements[p_i].distance, data_elements[d_i].distance, abs_tol=precision / 2):
+                data_elements[d_i].position = position_elements[p_i].position
+                p_start = p_i
+
+                break
 
         d_i += 1
-
-    return result

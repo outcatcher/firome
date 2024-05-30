@@ -3,7 +3,7 @@ from datetime import timezone
 from lxml import etree
 from lxml.etree import ElementBase
 
-from ..types.points import Point
+from ..types.points import DataPoint
 
 namespaces = {
     None: "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2",
@@ -21,7 +21,7 @@ def with_ns(tag: str, ns_key: str | None = None) -> str:
     return f"{{{namespaces[ns_key]}}}{tag}"
 
 
-def export_as_tcx(points: list[Point], destination: str):
+def export_as_tcx(points: list[DataPoint], destination: str):
     start_ts = points[0].timestamp.strftime(time_format)
 
     root_attrs = {
@@ -73,7 +73,7 @@ def new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
     return lap_track
 
 
-def append_point(point: Point, base_element: etree.ElementBase) -> etree.ElementBase:
+def append_point(point: DataPoint, base_element: etree.ElementBase) -> etree.ElementBase:
     """Trackpoint example
 
     <Trackpoint>
