@@ -3,8 +3,8 @@ name: Release
 # todo: replace with `release`
 on:
   push:
-    branches:
-      - release-upload
+    tags:
+      - *
 
 jobs:
   release:
