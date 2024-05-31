@@ -1,10 +1,6 @@
 name: Release
 
-# todo: replace with `release`
-on:
-  push:
-    tags:
-      - "*"
+on: [ release ]
 
 jobs:
   release:
@@ -13,14 +9,14 @@ jobs:
     strategy:
       matrix:
         os:
-#          - run: ubuntu-latest
-#            name: linux
+          - run: ubuntu-latest
+            name: linux
           - run: windows-latest
             name: windows
             venv_path: .venv\Scripts\
             ext: ".exe"
-#          - run: macos-latest
-#            name: macos
+          - run: macos-latest
+            name: macos
         application:
           - name: ui
             path: firome/ui/__main__.py
@@ -63,6 +59,7 @@ jobs:
           path: dist
       - uses: ncipollo/release-action@v1
         with:
-          generateReleaseNotes: true
           allowUpdates: true
+          omitNameDuringUpdate: true
+          omitBodyDuringUpdate: true
           artifacts: dist/*/*
