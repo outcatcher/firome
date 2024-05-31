@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    name: Release CLI and GUI apps
+    name: Release ${{ matrix.application.name }} app
     runs-on: ${{ matrix.os.run }}
     strategy:
       matrix:
@@ -19,7 +19,7 @@ jobs:
 #            name: windows
 #          - run: macos-latest
 #            name: macos
-        interface:
+        application:
           - name: ui
             path: firome/ui/__main__.py
             flag: --windowed
@@ -38,6 +38,10 @@ jobs:
       - name: Install pyinstaller
         run: ./.venv/bin/pip install pyinstaller
       - name: Run pyinstaller
-        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.path }}
+        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
       - name: Check binary
         run: ls -lAh ./dist
+      - name: Upload release
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./dist/*
