@@ -8,15 +8,15 @@ on:
 
 jobs:
   release:
-    name: Release ${{ matrix.application.name }} app
+    name: Release ${{ matrix.application.name }} ${{ matrix.os.name }} app
     runs-on: ${{ matrix.os.run }}
     strategy:
       matrix:
         os:
-          - run: ubuntu-latest
-            name: linux
-#          - run: windows-latest
-#            name: windows
+#          - run: ubuntu-latest
+#            name: linux
+          - run: windows-latest
+            name: windows
 #          - run: macos-latest
 #            name: macos
         application:
@@ -44,4 +44,5 @@ jobs:
       - name: Upload release
         uses: actions/upload-artifact@v4
         with:
-          path: ./dist/*
+          path: ./dist/firome-${{ matrix.application.name }}
+          name: ./dist/firome-${{ matrix.os.name }}-${{ matrix.application.name }}
