@@ -11,12 +11,12 @@ jobs:
         os:
           - run: ubuntu-latest
             name: linux
+            venv_path: .venv/bin/
+            ext: ""
           - run: windows-latest
             name: windows
             venv_path: .venv\Scripts\
             ext: ".exe"
-          - run: macos-latest
-            name: macos
         application:
           - name: ui
             path: firome/ui/__main__.py
