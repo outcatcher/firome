@@ -1,0 +1,24 @@
+name: Lint
+on: [push]
+
+jobs:
+  build-test:
+    name: Test context
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Echo vars
+        run: |
+          python3 --version
+      - name: Install pip
+        run: |
+          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
+      - name: Install Task
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+      - name: Run build
+        run: |
+          ~/.local/bin/task _prepare
+      - name: Run lint
+        run: |
+          ~/.local/bin/task lint
