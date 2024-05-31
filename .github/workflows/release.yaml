@@ -37,6 +37,8 @@ jobs:
           cache: "pip"
       - name: Create venv
         run: python -m venv .venv
+      - name: Install requirements
+        run: ${{  matrix.os.venv_path }}pip install -r requirements.txt
       - name: Install pyinstaller
         run: ${{  matrix.os.venv_path }}pip install pyinstaller
       - name: Run pyinstaller
