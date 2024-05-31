@@ -1,0 +1,65 @@
+name: Release
+
+on: [ release ]
+
+jobs:
+  release:
+    name: Release ${{ matrix.application.name }} ${{ matrix.os.name }} app
+    runs-on: ${{ matrix.os.run }}
+    strategy:
+      matrix:
+        os:
+          - run: ubuntu-latest
+            name: linux
+            venv_path: .venv/bin/
+            ext: ""
+          - run: windows-latest
+            name: windows
+            venv_path: .venv\Scripts\
+            ext: ".exe"
+        application:
+          - name: ui
+            path: firome/ui/__main__.py
+            flag: --windowed
+          - name: cli
+            path: firome/__main__.py
+            flag: --console
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Create venv
+        run: python -m venv .venv
+      - name: Install requirements
+        run: ${{  matrix.os.venv_path }}pip install -r requirements.txt
+      - name: Install pyinstaller
+        run: ${{  matrix.os.venv_path }}pip install pyinstaller
+      - name: Run pyinstaller
+        run:  ${{  matrix.os.venv_path }}pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
+      - name: Check binary
+        run: ls dist
+      - name: Upload release
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./dist/firome-${{ matrix.application.name }}${{ matrix.os.ext }}
+          name: firome-${{ matrix.os.name }}-${{ matrix.application.name }}
+
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          omitNameDuringUpdate: true
+          omitBodyDuringUpdate: true
+          artifacts: dist/*/*
