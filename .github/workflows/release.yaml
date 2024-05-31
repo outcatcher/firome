@@ -58,8 +58,11 @@ jobs:
     needs:
       - release
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
       - uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
           allowUpdates: true
-          artifacts: firome-*
+          artifacts: dist/*
