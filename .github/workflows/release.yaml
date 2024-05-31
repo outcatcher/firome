@@ -27,9 +27,9 @@ jobs:
             path: firome/__main__.py
             flag: --console
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -38,6 +38,6 @@ jobs:
       - name: Install pyinstaller
         run: ./.venv/bin/pip install pyinstaller
       - name: Run pyinstaller
-        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.name.path }}
+        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.path }}
       - name: Check binary
         run: ls -lAh ./dist
