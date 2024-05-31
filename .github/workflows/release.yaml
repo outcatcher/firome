@@ -47,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ./dist/firome-${{ matrix.application.name }}${{ matrix.os.ext }}
-          name: ./dist/firome-${{ matrix.os.name }}-${{ matrix.application.name }}
+          name: firome-${{ matrix.os.name }}-${{ matrix.application.name }}
