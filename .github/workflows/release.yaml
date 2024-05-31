@@ -1,0 +1,42 @@
+name: Release
+
+# todo: replace with `release`
+on:
+  push:
+    tags:
+      - '*'           # Push events to every tag not containing /
+
+jobs:
+  release:
+    name: Release CLI and GUI apps
+    runs-on: ${{ matrix.os.run }}
+    strategy:
+      matrix:
+        os:
+          - run: ubuntu-latest
+            name: linux
+          - run: windows-latest
+            name: windows
+          - run: macos-latest
+            name: macos
+        interface:
+          - name: ui
+            path: firome/ui/__main__.py
+            flag: --windowed
+          - name: cli
+            path: firome/__main__.py
+            flag: --console
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
+        with:
+          spec: ${{ matrix.interface.path }}
+          requirements: requirements.txt
+          python_ver: "3.11"
+          options: --onefile, --name firome-${{ matrix.interface.name }}, ${{ matrix.interface.flag }}
+
