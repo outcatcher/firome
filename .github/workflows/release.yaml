@@ -17,6 +17,7 @@ jobs:
 #            name: linux
           - run: windows-latest
             name: windows
+            venv_path: .venv\Scripts\
 #          - run: macos-latest
 #            name: macos
         application:
@@ -36,9 +37,9 @@ jobs:
       - name: Create venv
         run: python -m venv .venv
       - name: Install pyinstaller
-        run: ./.venv/bin/pip install pyinstaller
+        run: ${{ venv_path }}pip install pyinstaller
       - name: Run pyinstaller
-        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
+        run:  ${{ venv_path }}pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
       - name: Check binary
         run: ls -lAh ./dist
       - name: Upload release
