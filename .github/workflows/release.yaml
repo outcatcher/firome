@@ -38,6 +38,6 @@ jobs:
       - name: Install pyinstaller
         run: ./.venv/bin/pip install pyinstaller
       - name: Run pyinstaller
-        run: pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.name.path }}
+        run: ./.venv/bin/pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.name.path }}
       - name: Check binary
         run: ls -lAh ./dist
