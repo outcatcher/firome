@@ -37,9 +37,9 @@ jobs:
       - name: Create venv
         run: python -m venv .venv
       - name: Install pyinstaller
-        run: ${{ venv_path }}pip install pyinstaller
+        run: ${{  matrix.os.venv_path }}pip install pyinstaller
       - name: Run pyinstaller
-        run:  ${{ venv_path }}pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
+        run:  ${{  matrix.os.venv_path }}pyinstaller --onefile ${{ matrix.application.flag }} --name firome-${{ matrix.application.name }} ${{ matrix.application.path }}
       - name: Check binary
         run: ls -lAh ./dist
       - name: Upload release
