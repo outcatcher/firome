@@ -50,3 +50,16 @@ jobs:
         with:
           path: ./dist/firome-${{ matrix.application.name }}${{ matrix.os.ext }}
           name: firome-${{ matrix.os.name }}-${{ matrix.application.name }}
+
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - release
+    steps:
+      - uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          allowUpdates: true
+          artifacts: firome-*
