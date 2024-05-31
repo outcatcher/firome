@@ -25,8 +25,8 @@ result: 1716922421.tcx
 ```shell
 firome-ui
 ```
+![image](https://github.com/outcatcher/firome/assets/8591561/7f73fa54-1396-4e9c-a0fb-4d1db9f402a4)
 
-![image](https://github.com/outcatcher/firome/assets/8591561/266918ba-a565-4a0b-a1bd-d765a645ecf6)
 
 После выбора исходных файлов и нажатия на кнопку `OK` открывается диалог выбора места экспорта.
 
