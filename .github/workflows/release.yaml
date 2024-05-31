@@ -3,8 +3,8 @@ name: Release
 # todo: replace with `release`
 on:
   push:
-    tags:
-      - '*'           # Push events to every tag not containing /
+    branches:
+      - release-upload
 
 jobs:
   release:
@@ -32,12 +32,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-      - name: Create Executable
-        uses: sayyid5416/pyinstaller@v1
-        with:
-          spec: ${{ matrix.interface.path }}
-          requirements: requirements.txt
-          python_ver: "3.11"
-          options: --onefile, --name firome-${{ matrix.interface.name }}, ${{ matrix.interface.flag }}
+          cache: "pip"
+      - name: Create venv
+        run: python -m venv .venv
+      - name: Install pyinstaller
+        run: ./.venv/bin/pip install pyinstaller
+      - name: Run pyinstaller
+        run: pyinstaller --onefile ${{ matrix.interface.flag }} --name firome-${{ matrix.interface.name }} ${{ matrix.interface.name.path }}
       - name: Check binary
         run: ls -lAh ./dist
