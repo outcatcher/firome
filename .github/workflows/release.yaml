@@ -65,4 +65,4 @@ jobs:
         with:
           generateReleaseNotes: true
           allowUpdates: true
-          artifacts: dist/*
+          artifacts: dist/*/*
