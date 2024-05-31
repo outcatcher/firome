@@ -18,6 +18,7 @@ jobs:
           - run: windows-latest
             name: windows
             venv_path: .venv\Scripts\
+            ext: ".exe"
 #          - run: macos-latest
 #            name: macos
         application:
@@ -46,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ./dist/firome-${{ matrix.application.name }}
-          name: ./dist/firome-${{ matrix.os.name }}-${{ matrix.application.name }}
+          name: ./dist/firome-${{ matrix.os.name }}-${{ matrix.application.name }}${{ matrix.os.ext }}
