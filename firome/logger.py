@@ -1,4 +1,5 @@
 import logging
+
 from sys import stdout
 
 __hdl = logging.StreamHandler(stdout)
@@ -6,3 +7,4 @@ __hdl.setFormatter(logging.Formatter())  # TODO: выбрать нормальн
 
 LOGGER = logging.Logger("merger", logging.INFO)
 LOGGER.addHandler(__hdl)
+LOGGER.setLevel(logging.DEBUG)

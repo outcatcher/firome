@@ -2,7 +2,7 @@ import argparse
 import logging
 import time
 
-from firome.logging import LOGGER
+from firome.logger import LOGGER
 from firome.merge import merge
 from firome.export.tcx import export_as_tcx
 

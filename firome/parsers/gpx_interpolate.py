@@ -27,10 +27,10 @@ from typing import Dict, List, Union
 import numpy as np
 from scipy.interpolate import pchip_interpolate
 
-from firome.logging import LOGGER
-from firome.types.points import PositionPoint
+from firome.logger import LOGGER
+from firome.classes.points import PositionPoint
 
-# types
+# classes
 GPXData = Dict[str, Union[List[float], None]]
 
 # globals

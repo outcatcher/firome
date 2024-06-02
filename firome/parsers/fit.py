@@ -1,7 +1,7 @@
 from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
 
-from ..logging import LOGGER
-from ..types.points import DataPoint
+from ..logger import LOGGER
+from ..classes.points import DataPoint
 
 
 def parse_fit(src: str) -> list[DataPoint]:

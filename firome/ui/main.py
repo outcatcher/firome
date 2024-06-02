@@ -1,11 +1,12 @@
 import time
 
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
 
 from ..export.tcx import export_as_tcx
 from ..merge import merge
-from ..types.points import DataPoint
+from ..classes.export import list_export_fields, ExportFields
+from ..classes.points import DataPoint
 from ..ui.main_ui import Ui_MainWindow  # TODO: load directly from .ui file
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
@@ -27,6 +28,8 @@ class MainWindow(QMainWindow):
         self.ui.buttonActivitySelect.clicked.connect(self.on_select_activity_click)
 
         self._init_precision_slider()
+
+        self._checkbox_values = self._init_checkboxes()
 
     def on_select_activity_click(self):
         dialog = QFileDialog(self)
@@ -61,7 +64,9 @@ class MainWindow(QMainWindow):
         dialog.selectFile(f"{int(time.time())}.tcx")
 
         if dialog.exec_():
-            export_as_tcx(points, dialog.selectedFiles()[0])
+            checkbox_dict = {k: v.isChecked() for k, v in self._checkbox_values.items()}
+
+            export_as_tcx(points, dialog.selectedFiles()[0], ExportFields(**checkbox_dict))
 
         self._reset_input()
         self.ui.buttonBox.blockSignals(False)
@@ -87,6 +92,23 @@ class MainWindow(QMainWindow):
         self._update_precision_value()
 
         slider.valueChanged.connect(self._update_precision_value)
+
+    def _init_checkboxes(self) -> dict[str, QCheckBox]:
+        checkbox_values = {}
+
+        layout = self.ui.checkboxLayout
+
+        layout.addWidget(QLabel("Select exported data fields:"))
+
+        for field in list_export_fields():
+            checkbox = QCheckBox(field, self)
+            checkbox.setChecked(True)
+
+            layout.addWidget(checkbox)
+
+            checkbox_values[field] = checkbox
+
+        return checkbox_values
 
     @property
     def precision(self) -> float:

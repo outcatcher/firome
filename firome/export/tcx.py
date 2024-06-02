@@ -3,11 +3,14 @@ from datetime import timezone
 from lxml import etree
 from lxml.etree import ElementBase
 
-from ..types.points import DataPoint
+from ..classes.export import ExportFields
+from ..classes.points import DataPoint
 
 namespaces = {
+    # ref: https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd
     None: "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2",
     "ns5": "http://www.garmin.com/xmlschemas/ActivityGoals/v1",
+    # ref: https://www8.garmin.com/xmlschemas/ActivityExtensionv2.xsd
     "ns3": "http://www.garmin.com/xmlschemas/ActivityExtension/v2",
     "ns2": "http://www.garmin.com/xmlschemas/UserProfile/v2",
     "xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -21,7 +24,7 @@ def with_ns(tag: str, ns_key: str | None = None) -> str:
     return f"{{{namespaces[ns_key]}}}{tag}"
 
 
-def export_as_tcx(points: list[DataPoint], destination: str):
+def export_as_tcx(points: list[DataPoint], destination: str, fields=ExportFields()):
     start_ts = points[0].timestamp.strftime(time_format)
 
     root_attrs = {
@@ -57,7 +60,7 @@ def export_as_tcx(points: list[DataPoint], destination: str):
 
             lap_track = new_lap(activity, start_ts)
 
-        append_point(p, lap_track)
+        append_point(p, lap_track, fields)
 
     root.getroottree().write(destination, encoding="utf-8", xml_declaration=True)
 
@@ -73,7 +76,7 @@ def new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
     return lap_track
 
 
-def append_point(point: DataPoint, base_element: etree.ElementBase) -> etree.ElementBase:
+def append_point(point: DataPoint, base_element: etree.ElementBase, fields: ExportFields) -> etree.ElementBase:
     """Trackpoint example
 
     <Trackpoint>
@@ -115,22 +118,25 @@ def append_point(point: DataPoint, base_element: etree.ElementBase) -> etree.Ele
         p_pos_lon.text = str(point.position[1])
 
     #  <AltitudeMeters>152</AltitudeMeters>
-    # для высоты используем данные стравы
+    if fields.Altitude and point.elevation is not None:
+        p_alt = etree.SubElement(result, with_ns("AltitudeMeters"))
+        p_alt.text = str(point.elevation)
 
     # <DistanceMeters>14956.23</DistanceMeters>
-    p_distance = etree.SubElement(result, with_ns("DistanceMeters"))
-    p_distance.text = str(point.distance)
+    if fields.Distance:
+        p_distance = etree.SubElement(result, with_ns("DistanceMeters"))
+        p_distance.text = str(point.distance)
 
     #   <HeartRateBpm>
     #     <Value>168</Value>
     #   </HeartRateBpm>
-    if point.heart_rate is not None:
+    if fields.HeartRate and point.heart_rate is not None:
         p_hr = etree.SubElement(result, with_ns("HeartRateBpm"))
         p_hr_val = etree.SubElement(p_hr, with_ns("Value"))
         p_hr_val.text = str(point.heart_rate)
 
     # <Cadence>90</Cadence>
-    if point.cadence is not None:
+    if fields.Cadence and point.cadence is not None:
         p_cadence = etree.SubElement(result, with_ns("Cadence"))
         p_cadence.text = str(point.cadence)
 
@@ -140,12 +146,16 @@ def append_point(point: DataPoint, base_element: etree.ElementBase) -> etree.Ele
     #           <ns3:Watts>135</ns3:Watts>
     #       </ns3:TPX>
     #   </Extensions>
-    if point.speed is not None:
+    need_speed = fields.Speed and point.speed is not None
+    need_pwr = fields.Power and point.power is not None
+    if need_speed or need_pwr:
         p_ext = etree.SubElement(result, with_ns("Extensions"))
         p_ext_tpx = etree.SubElement(p_ext, with_ns("TPX", "ns3"))
-        p_ext_tpx_speed = etree.SubElement(p_ext_tpx, with_ns("Speed", "ns3"))
-        p_ext_tpx_speed.text = str(point.speed)
-        p_ext_watts = etree.SubElement(p_ext_tpx, with_ns("Watts", "ns3"))
-        p_ext_watts.text = str(point.power)
+        if need_speed:
+            p_ext_tpx_speed = etree.SubElement(p_ext_tpx, with_ns("Speed", "ns3"))
+            p_ext_tpx_speed.text = str(point.speed)
+        if need_pwr:
+            p_ext_watts = etree.SubElement(p_ext_tpx, with_ns("Watts", "ns3"))
+            p_ext_watts.text = str(point.power)
 
     return result

@@ -3,7 +3,7 @@ from typing import Optional
 from geopy.distance import geodesic
 from lxml import etree
 
-from ..types.points import Position, PositionPoint
+from ..classes.points import Position, PositionPoint
 
 
 def parse_gpx(src: str) -> list[PositionPoint]:
