@@ -35,7 +35,7 @@ tasks:
     preconditions:
       - pip install pyinstaller  # TODO: use tox or other dependency splitting
     cmds:
-      - pyinstaller --onefile --windowed --name firome-ui firome/ui/__main__.py
+      - pyinstaller --onefile --windowed --add-data "firome/ui/assets/*.json:firome/ui/assets" --name firome-ui firome/ui/__main__.py
 
   lint:
     preconditions:

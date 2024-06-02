@@ -3,10 +3,11 @@ import time
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
 
-from ..export.tcx import export_as_tcx
-from ..merge import merge
+from .translate import Translator
 from ..classes.export import list_export_fields, ExportFields
 from ..classes.points import DataPoint
+from ..export.tcx import export_as_tcx
+from ..merge import merge
 from ..ui.main_ui import Ui_MainWindow  # TODO: load directly from .ui file
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
@@ -15,6 +16,11 @@ _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # gettext seems bit too complex
+        self._translator = Translator("assets/main_{0}.json")
+
+        self._export_fields = ExportFields()
 
         self._threadpool = QThreadPool()
 
@@ -30,6 +36,11 @@ class MainWindow(QMainWindow):
         self._init_precision_slider()
 
         self._checkbox_values = self._init_checkboxes()
+
+        self._translate_static()
+
+    def tr(self, msg):
+        return self._translator.translate(msg)
 
     def on_select_activity_click(self):
         dialog = QFileDialog(self)
@@ -98,10 +109,11 @@ class MainWindow(QMainWindow):
 
         layout = self.ui.checkboxLayout
 
-        layout.addWidget(QLabel("Select exported data fields:"))
+        layout.addWidget(QLabel(self.tr("labelSelectExportedList")))
 
         for field in list_export_fields():
-            checkbox = QCheckBox(field, self)
+            checkbox = QCheckBox(self.tr(field), self)
+            checkbox.stateChanged.connect(lambda v: self._set_export_field(field, bool(v)))
             checkbox.setChecked(True)
 
             layout.addWidget(checkbox)
@@ -110,12 +122,23 @@ class MainWindow(QMainWindow):
 
         return checkbox_values
 
+    def _set_export_field(self, name: str, value: bool):
+        setattr(self._export_fields, name, value)
+
     @property
     def precision(self) -> float:
         return _precision_positions[self.ui.horizontalSlider.sliderPosition()]
 
     def _update_precision_value(self):
-        self.ui.precisionValue.setText(str(self.precision))
+        self.ui.precisionValue.setText(self.tr(self.precision))
+
+    def _translate_static(self):
+        self.ui.buttonRouteSelect.setText(self.tr("btnRouteSelect"))
+        self.ui.buttonActivitySelect.setText(self.tr("btnActivitySelect"))
+        self.ui.precisionLabel.setText(self.tr("lblPrecision"))
+
+        for button in self.ui.buttonBox.buttons():
+            button.setText(self.tr(button.text()))
 
 
 class WorkerSignals(QObject):

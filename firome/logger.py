@@ -7,4 +7,3 @@ __hdl.setFormatter(logging.Formatter())  # TODO: выбрать нормальн
 
 LOGGER = logging.Logger("merger", logging.INFO)
 LOGGER.addHandler(__hdl)
-LOGGER.setLevel(logging.DEBUG)

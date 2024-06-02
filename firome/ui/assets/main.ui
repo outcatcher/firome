@@ -17,9 +17,9 @@
    <widget class="QPushButton" name="buttonActivitySelect">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>460</x>
       <y>70</y>
-      <width>121</width>
+      <width>141</width>
       <height>25</height>
      </rect>
     </property>
@@ -56,9 +56,9 @@
    <widget class="QPushButton" name="buttonRouteSelect">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>460</x>
       <y>20</y>
-      <width>121</width>
+      <width>141</width>
       <height>25</height>
      </rect>
     </property>
