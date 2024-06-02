@@ -3,7 +3,7 @@ import math
 from .parsers.fit import parse_fit
 from .parsers.gpx import parse_gpx
 from .parsers.gpx_interpolate import interpolate
-from .types.points import DataPoint, PositionPoint
+from .classes.points import DataPoint, PositionPoint
 
 
 def merge(route_path: str, recording_path: str, precision: float) -> list[DataPoint]:
@@ -28,6 +28,7 @@ def _merge(position_elements: list[PositionPoint], data_elements: list[DataPoint
         for p_i in range(p_start, p_len):
             if math.isclose(position_elements[p_i].distance, data_elements[d_i].distance, abs_tol=precision / 2):
                 data_elements[d_i].position = position_elements[p_i].position
+                data_elements[d_i].elevation = position_elements[p_i].elevation
                 p_start = p_i
 
                 break

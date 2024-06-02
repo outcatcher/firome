@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialogButtonBox, QLabel,
     QLineEdit, QMainWindow, QPushButton, QSizePolicy,
-    QSlider, QWidget)
+    QSlider, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -54,6 +54,12 @@ class Ui_MainWindow(object):
         self.precisionValue = QLabel(self.centralwidget)
         self.precisionValue.setObjectName(u"precisionValue")
         self.precisionValue.setGeometry(QRect(460, 140, 67, 17))
+        self.verticalLayoutWidget = QWidget(self.centralwidget)
+        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
+        self.verticalLayoutWidget.setGeometry(QRect(20, 180, 421, 161))
+        self.checkboxLayout = QVBoxLayout(self.verticalLayoutWidget)
+        self.checkboxLayout.setObjectName(u"checkboxLayout")
+        self.checkboxLayout.setContentsMargins(0, 0, 0, 0)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
