@@ -1,18 +1,25 @@
 from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
 
+from .archive import unzip
+from .errors import UnsupportedFileExt
 from ..logger import LOGGER
 from ..classes.points import DataPoint
 
 
 def parse_fit(src: str) -> list[DataPoint]:
+    if src.lower().endswith(".zip"):
+        src = unzip(src)
+
     if not src.lower().endswith(".fit"):
-        raise Exception("unsupported file type")
+        raise UnsupportedFileExt(src)
 
     result = []
 
+    parser = _FitParser()
+
     with FitReader(src) as fit:
         for data in fit:
-            point = frames_to_point(data)
+            point = parser.frame_to_point(data)
 
             if point is None:
                 continue
@@ -22,30 +29,29 @@ def parse_fit(src: str) -> list[DataPoint]:
     return result
 
 
-_LAP = 1
+class _FitParser:
+    def __init__(self):
+        self._lap = 1
 
+    def frame_to_point(self, data: FitDataMessage) -> DataPoint | None:
+        if data.frame_type != FIT_FRAME_DATA:
+            return None
 
-def frames_to_point(data: FitDataMessage) -> DataPoint | None:
-    global _LAP  # TODO: в будущем убрать в класс?
+        if data.has_field("lap_trigger"):
+            self._lap += 1
 
-    if data.frame_type != FIT_FRAME_DATA:
-        return None
+        if not data.has_field("distance"):
+            LOGGER.debug(data.frame_type)
+            LOGGER.debug([field.name for field in data.fields])
 
-    if data.has_field("lap_trigger"):
-        _LAP += 1
+            return None
 
-    if not data.has_field("distance"):
-        LOGGER.debug(data.frame_type)
-        LOGGER.debug([field.name for field in data.fields])
-
-        return None
-
-    return DataPoint(
-        timestamp=data.get_value("timestamp"),
-        distance=data.get_value("distance"),
-        speed=data.get_value("speed", fallback=None),
-        power=data.get_value("power", fallback=None),
-        heart_rate=data.get_value("heart_rate", fallback=None),
-        cadence=data.get_value("cadence"),
-        lap=_LAP,
-    )
+        return DataPoint(
+            timestamp=data.get_value("timestamp"),
+            distance=data.get_value("distance"),
+            speed=data.get_value("speed", fallback=None),
+            power=data.get_value("power", fallback=None),
+            heart_rate=data.get_value("heart_rate", fallback=None),
+            cadence=data.get_value("cadence"),
+            lap=self._lap,
+        )

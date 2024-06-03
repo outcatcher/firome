@@ -3,10 +3,18 @@ from typing import Optional
 from geopy.distance import geodesic
 from lxml import etree
 
+from .archive import unzip
+from .errors import UnsupportedFileExt
 from ..classes.points import Position, PositionPoint
 
 
 def parse_gpx(src: str) -> list[PositionPoint]:
+    if src.lower().endswith(".zip"):
+        src = unzip(src)
+
+    if not src.lower().endswith(".gpx"):
+        raise UnsupportedFileExt(src)
+
     result = []
 
     root: etree.ElementBase = etree.parse(src).getroot()
