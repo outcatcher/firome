@@ -4,6 +4,7 @@
   "btnActivitySelect": "Выбрать активность",
   "lblPrecision": "Разрешение, м",
   "Cancel": "Отмена",
+  "&Cancel": "&Отмена",
   "Altitude": "Высота",
   "Distance": "Расстояние",
   "HeartRate": "Пульс",
