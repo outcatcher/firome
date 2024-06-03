@@ -25,10 +25,12 @@ result: 1716922421.tcx
 ```shell
 firome-ui
 ```
-![image](https://github.com/outcatcher/firome/assets/8591561/7f73fa54-1396-4e9c-a0fb-4d1db9f402a4)
+![image](https://github.com/outcatcher/firome/assets/8591561/f031bbf0-9c73-48eb-a227-9cda170eed6b)
 
 
 После выбора исходных файлов и нажатия на кнопку `OK` открывается диалог выбора места экспорта.
+
+_Язык приложения зависит от языка системы_
 
 ## Данные
 
@@ -60,3 +62,5 @@ firome-ui
 Поддерживаемые форматы результата:
 
 - TCX
+
+Список выгружаемых полей можно настроить на GUI.
