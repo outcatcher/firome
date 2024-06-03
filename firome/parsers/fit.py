@@ -19,7 +19,7 @@ def parse_fit(src: str) -> list[DataPoint]:
 
     with FitReader(src) as fit:
         for data in fit:
-            point = parser.frames_to_point(data)
+            point = parser.frame_to_point(data)
 
             if point is None:
                 continue
@@ -33,7 +33,7 @@ class _FitParser:
     def __init__(self):
         self._lap = 1
 
-    def frames_to_point(self, data: FitDataMessage) -> DataPoint | None:
+    def frame_to_point(self, data: FitDataMessage) -> DataPoint | None:
         if data.frame_type != FIT_FRAME_DATA:
             return None
 
