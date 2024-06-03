@@ -41,7 +41,7 @@ jobs:
       - name: Install pyinstaller
         run: ${{  matrix.os.venv_path }}pip install pyinstaller
       - name: Run pyinstaller
-        run:  |
+        run:  >
           ${{  matrix.os.venv_path }}pyinstaller 
           --onefile ${{ matrix.application.flag }} 
           --name firome-${{ matrix.application.name }}
