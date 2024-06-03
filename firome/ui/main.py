@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter("FIT (*.fit)")
+        dialog.setNameFilter("FIT (*.fit *.fit.zip)")
         if dialog.exec_():
             self.ui.inputActivitySelect.setText(dialog.selectedFiles()[0])
 
