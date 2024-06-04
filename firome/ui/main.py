@@ -4,11 +4,11 @@ from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
 
 from .main_ui import Ui_MainWindow
-from ..classes.export import list_export_fields, ExportFields
+from ..classes.export import ExportFields
 from ..classes.points import DataPoint
 from ..codecs.tcx import export_as_tcx
+from ..i18n import Translator
 from ..merge import merge
-from ..translations.translate import Translator
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(QLabel(self.tr("labelSelectExportedList")))
 
-        for field in list_export_fields():
+        for field in ExportFields.list_fields():
             checkbox = QCheckBox(self.tr(field), self)
             checkbox.stateChanged.connect(lambda v: self._set_export_field(field, bool(v)))
             checkbox.setChecked(True)

@@ -14,6 +14,7 @@ def _locale_name():
 
 class Translator:
     """Translator handling translations to language detected from system"""
+
     def __init__(self, domain: str):
         tr_path = path.abspath(path.join(path.dirname(__file__), "assets", domain + ".ini"))
 

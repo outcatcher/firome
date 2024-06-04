@@ -102,25 +102,25 @@ def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: Exp
         p_pos_lon.text = str(point.position[1])
 
     #  <AltitudeMeters>152</AltitudeMeters>
-    if fields.Altitude and point.elevation is not None:
+    if fields.altitude and point.elevation is not None:
         p_alt = etree.SubElement(result, _with_ns("AltitudeMeters"))
         p_alt.text = str(point.elevation)
 
     # <DistanceMeters>14956.23</DistanceMeters>
-    if fields.Distance:
+    if fields.distance:
         p_distance = etree.SubElement(result, _with_ns("DistanceMeters"))
         p_distance.text = str(point.distance)
 
     #   <HeartRateBpm>
     #     <Value>168</Value>
     #   </HeartRateBpm>
-    if fields.HeartRate and point.heart_rate is not None:
+    if fields.heart_rate and point.heart_rate is not None:
         p_hr = etree.SubElement(result, _with_ns("HeartRateBpm"))
         p_hr_val = etree.SubElement(p_hr, _with_ns("Value"))
         p_hr_val.text = str(point.heart_rate)
 
     # <Cadence>90</Cadence>
-    if fields.Cadence and point.cadence is not None:
+    if fields.cadence and point.cadence is not None:
         p_cadence = etree.SubElement(result, _with_ns("Cadence"))
         p_cadence.text = str(point.cadence)
 
@@ -130,8 +130,8 @@ def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: Exp
     #           <ns3:Watts>135</ns3:Watts>
     #       </ns3:TPX>
     #   </Extensions>
-    need_speed = fields.Speed and point.speed is not None
-    need_pwr = fields.Power and point.power is not None
+    need_speed = fields.speed and point.speed is not None
+    need_pwr = fields.power and point.power is not None
     if need_speed or need_pwr:
         p_ext = etree.SubElement(result, _with_ns("Extensions"))
         p_ext_tpx = etree.SubElement(p_ext, _with_ns("TPX", "ns3"))
