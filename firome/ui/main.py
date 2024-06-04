@@ -3,12 +3,12 @@ import time
 from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
 
-from .translate import Translator
-from ..classes.export import list_export_fields, ExportFields
+from .main_ui import Ui_MainWindow
+from ..classes.export import ExportFields
 from ..classes.points import DataPoint
-from ..export.tcx import export_as_tcx
+from ..codecs.tcx import export_as_tcx
+from ..i18n import Translator
 from ..merge import merge
-from ..ui.main_ui import Ui_MainWindow  # TODO: load directly from .ui file
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # gettext seems bit too complex
-        self._translator = Translator("assets/main_{0}.json")
+        self._translator = Translator("ui")
 
         self._export_fields = ExportFields()
 
@@ -39,14 +39,14 @@ class MainWindow(QMainWindow):
 
         self._translate_static()
 
-    def tr(self, msg):
+    def tr(self, msg, *_):
         return self._translator.translate(msg)
 
     def on_select_activity_click(self):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter("FIT (*.fit *.fit.zip)")
+        dialog.setNameFilter(self.tr("nameFilterActivity") + " (*.fit *.fit.zip)")
         if dialog.exec_():
             self.ui.inputActivitySelect.setText(dialog.selectedFiles()[0])
 
@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter("Route files (*.gpx)")
+        dialog.setNameFilter(self.tr("nameFilterRoute") + " (*.gpx)")
         if dialog.exec_():
             self.ui.inputRouteSelect.setText(dialog.selectedFiles()[0])
 
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(QLabel(self.tr("labelSelectExportedList")))
 
-        for field in list_export_fields():
+        for field in ExportFields.list_fields():
             checkbox = QCheckBox(self.tr(field), self)
             checkbox.stateChanged.connect(lambda v: self._set_export_field(field, bool(v)))
             checkbox.setChecked(True)
@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
         return _precision_positions[self.ui.horizontalSlider.sliderPosition()]
 
     def _update_precision_value(self):
-        self.ui.precisionValue.setText(self.tr(self.precision))
+        self.ui.precisionValue.setText(str(self.precision))
 
     def _translate_static(self):
         self.ui.buttonRouteSelect.setText(self.tr("btnRouteSelect"))

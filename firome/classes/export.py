@@ -1,15 +1,15 @@
-import dataclasses
+from dataclasses import dataclass, asdict
 
 
-@dataclasses.dataclass
+@dataclass
 class ExportFields:
-    Altitude: bool = False
-    Distance: bool = True
-    HeartRate: bool = True
-    Cadence: bool = True
-    Speed: bool = True
-    Power: bool = True
+    altitude: bool = False
+    distance: bool = True
+    heart_rate: bool = True
+    cadence: bool = True
+    speed: bool = True
+    power: bool = True
 
-
-def list_export_fields():
-    return dataclasses.asdict(ExportFields()).keys()
+    @classmethod
+    def list_fields(cls):
+        return asdict(cls()).keys()

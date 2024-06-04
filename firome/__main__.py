@@ -4,7 +4,7 @@ import time
 
 from firome.logger import LOGGER
 from firome.merge import merge
-from firome.export.tcx import export_as_tcx
+from firome.codecs.tcx import export_as_tcx
 
 parser = argparse.ArgumentParser(
     description="Combines GPX file with training data with GPX file with position data based on the distance"

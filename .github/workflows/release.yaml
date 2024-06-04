@@ -45,7 +45,7 @@ jobs:
           ${{  matrix.os.venv_path }}pyinstaller 
           --onefile ${{ matrix.application.flag }} 
           --name firome-${{ matrix.application.name }}
-          --add-data "firome/ui/assets/*.json:firome/ui/assets"
+          --add-data "firome/i18n/assets/*.ini:firome/i18n/assets"
           ${{ matrix.application.path }}
       - name: Check binary
         run: ls dist

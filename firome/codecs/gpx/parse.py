@@ -3,9 +3,10 @@ from typing import Optional
 from geopy.distance import geodesic
 from lxml import etree
 
-from .archive import unzip
-from .errors import UnsupportedFileExt
-from ..classes.points import Position, PositionPoint
+from ..errors import UnsupportedFileExtError
+from ..xml import add_ns
+from ..zip import unzip
+from ...classes.points import Position, PositionPoint
 
 
 def parse_gpx(src: str) -> list[PositionPoint]:
@@ -13,7 +14,7 @@ def parse_gpx(src: str) -> list[PositionPoint]:
         src = unzip(src)
 
     if not src.lower().endswith(".gpx"):
-        raise UnsupportedFileExt(src)
+        raise UnsupportedFileExtError(src)
 
     result = []
 
@@ -34,7 +35,7 @@ def parse_gpx(src: str) -> list[PositionPoint]:
 
         gpx_point = PositionPoint(
             position=position,
-            distance=total_distance(position, prev),
+            distance=__total_distance(position, prev),
             elevation=float(elevation_element.text),
         )
         result.append(gpx_point)
@@ -44,11 +45,7 @@ def parse_gpx(src: str) -> list[PositionPoint]:
     return result
 
 
-def add_ns(tag, ns):
-    return f"{{{ns}}}{tag}"
-
-
-def total_distance(current: Position, previous: Optional[PositionPoint]) -> float:
+def __total_distance(current: Position, previous: Optional[PositionPoint]) -> float:
     if previous is None:
         return 0
 

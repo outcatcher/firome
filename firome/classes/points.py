@@ -1,12 +1,12 @@
-import dataclasses
-import datetime
+from dataclasses import dataclass
+from datetime import datetime
 
 Position = tuple[float, float]
 
 
-@dataclasses.dataclass
+@dataclass
 class DataPoint:
-    timestamp: datetime.datetime = None
+    timestamp: datetime = None
     speed: float = None
     power: int = None
     heart_rate: int = None
@@ -18,7 +18,7 @@ class DataPoint:
     elevation: float = None
 
 
-@dataclasses.dataclass
+@dataclass
 class PositionPoint:
     position: Position
     distance: float
