@@ -1,9 +1,9 @@
 from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
 
-from .archive import unzip
-from .errors import UnsupportedFileExt
-from ..logger import LOGGER
-from ..classes.points import DataPoint
+from ..zip import unzip
+from ..errors import UnsupportedFileExtError
+from ...logger import LOGGER
+from ...classes.points import DataPoint
 
 
 def parse_fit(src: str) -> list[DataPoint]:
@@ -11,29 +11,39 @@ def parse_fit(src: str) -> list[DataPoint]:
         src = unzip(src)
 
     if not src.lower().endswith(".fit"):
-        raise UnsupportedFileExt(src)
-
-    result = []
-
-    parser = _FitParser()
+        raise UnsupportedFileExtError(src)
 
     with FitReader(src) as fit:
-        for data in fit:
-            point = parser.frame_to_point(data)
+        result = __FitParser(fit).process()
+
+    return result
+
+
+class __FitParser:
+    def __init__(self, reader: FitReader):
+        self._lap = 1  # track increasing lap value
+        self._fit = reader
+        self._closed = False
+
+    def process(self):
+        if self._closed:
+            raise Exception("__FitParser reused")
+
+        result = []
+
+        for data in self._fit:
+            point = self.__frame_to_point(data)
 
             if point is None:
                 continue
 
             result.append(point)
 
-    return result
+        self._closed = True
 
+        return result
 
-class _FitParser:
-    def __init__(self):
-        self._lap = 1
-
-    def frame_to_point(self, data: FitDataMessage) -> DataPoint | None:
+    def __frame_to_point(self, data: FitDataMessage) -> DataPoint | None:
         if data.frame_type != FIT_FRAME_DATA:
             return None
 

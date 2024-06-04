@@ -31,7 +31,7 @@ from firome.logger import LOGGER
 from firome.classes.points import PositionPoint
 
 # classes
-GPXData = Dict[str, Union[List[float], None]]
+_GPXData = Dict[str, Union[List[float], None]]
 
 # globals
 _EARTH_RADIUS = 6371e3  # meters
@@ -55,7 +55,7 @@ def interpolate(track: list[PositionPoint], resolution: float) -> list[PositionP
     return __to_track(gpx_data_interp)
 
 
-def __gpx_interpolate(gpx_data: GPXData, res: float = 5.0) -> GPXData:
+def __gpx_interpolate(gpx_data: _GPXData, res: float = 5.0) -> _GPXData:
     """
     Returns gpx_data interpolated with a spatial resolution res using piecewise cubic Hermite splines.
 
@@ -86,7 +86,7 @@ def __gpx_interpolate(gpx_data: GPXData, res: float = 5.0) -> GPXData:
     return gpx_data_interp
 
 
-def __gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[float]:
+def __gpx_calculate_distance(gpx_data: _GPXData, use_ele: bool = True) -> List[float]:
     """
     Returns the distance between GPX trackpoints.
 
@@ -120,7 +120,7 @@ def __gpx_calculate_distance(gpx_data: GPXData, use_ele: bool = True) -> List[fl
     return gpx_dist.tolist()
 
 
-def __gpx_remove_duplicates(gpx_data: GPXData) -> GPXData:
+def __gpx_remove_duplicates(gpx_data: _GPXData) -> _GPXData:
     """
     Returns gpx_data where duplicate trackpoints are removed.
     """
@@ -140,7 +140,7 @@ def __gpx_remove_duplicates(gpx_data: GPXData) -> GPXData:
     return gpx_data_nodup
 
 
-def __from_track(track: list[PositionPoint]) -> GPXData:
+def __from_track(track: list[PositionPoint]) -> _GPXData:
     """
     Returns a GPXData structure from a GPX file.
     """
@@ -157,7 +157,7 @@ def __from_track(track: list[PositionPoint]) -> GPXData:
     return gpx_data
 
 
-def __to_track(gpx_data: GPXData) -> list[PositionPoint]:
+def __to_track(gpx_data: _GPXData) -> list[PositionPoint]:
     gpx_track = []
 
     for i in range(len(gpx_data["lat"])):

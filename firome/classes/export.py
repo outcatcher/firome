@@ -1,7 +1,7 @@
-import dataclasses
+from dataclasses import dataclass, asdict
 
 
-@dataclasses.dataclass
+@dataclass
 class ExportFields:
     Altitude: bool = False
     Distance: bool = True
@@ -12,4 +12,4 @@ class ExportFields:
 
 
 def list_export_fields():
-    return dataclasses.asdict(ExportFields()).keys()
+    return asdict(ExportFields()).keys()

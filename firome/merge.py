@@ -1,9 +1,8 @@
 import math
 
-from .parsers.fit import parse_fit
-from .parsers.gpx import parse_gpx
-from .parsers.gpx_interpolate import interpolate
 from .classes.points import DataPoint, PositionPoint
+from .codecs.fit import parse_fit
+from .codecs.gpx import parse_gpx, interpolate
 
 
 def merge(route_path: str, recording_path: str, precision: float) -> list[DataPoint]:
