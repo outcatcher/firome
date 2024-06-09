@@ -19,7 +19,7 @@ class Translator:
         tr_path = path.abspath(path.join(path.dirname(__file__), "assets", domain + ".ini"))
 
         cfg = ConfigParser()
-        cfg.read(tr_path)
+        cfg.read(tr_path, encoding="utf-8")
         self.translations = cfg[_locale_name()]
 
     def translate(self, key: str) -> str:
