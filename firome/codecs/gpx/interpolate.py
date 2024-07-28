@@ -113,7 +113,7 @@ def __gpx_calculate_distance(gpx_data: _GPXData, use_ele: bool = True) -> List[f
         if gpx_data["ele"] and use_ele:
             dist_ele = gpx_data["ele"][i + 1] - gpx_data["ele"][i]
 
-            gpx_dist[i + 1] = np.sqrt(dist_latlon**2 + dist_ele**2)
+            gpx_dist[i + 1] = np.sqrt(dist_latlon ** 2 + dist_ele ** 2)
         else:
             gpx_dist[i + 1] = dist_latlon
 
@@ -160,10 +160,13 @@ def __from_track(track: list[PositionPoint]) -> _GPXData:
 def __to_track(gpx_data: _GPXData) -> list[PositionPoint]:
     gpx_track = []
 
+    # re-calculate distance for interpolated points
+    _ip_dist = np.cumsum(__gpx_calculate_distance(gpx_data, use_ele=True))
+
     for i in range(len(gpx_data["lat"])):
         lat = gpx_data["lat"][i]
         lon = gpx_data["lon"][i]
-        dist = gpx_data["dist"][i]
+        dist = _ip_dist[i]
         ele = gpx_data["ele"][i] if gpx_data["ele"] else None
 
         gpx_point = PositionPoint(position=(lat, lon), elevation=ele, distance=dist)

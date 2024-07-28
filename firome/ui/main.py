@@ -1,14 +1,14 @@
 import time
 
-from PySide6.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject
+from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
 
 from .main_ui import Ui_MainWindow
+from .main_workers import MergeWorker, LoadRouteWorker, LoadActivityWorker
 from ..classes.export import ExportFields
-from ..classes.points import DataPoint
+from ..classes.points import DataPoint, PositionPoint
 from ..codecs.tcx import export_as_tcx
 from ..i18n import Translator
-from ..merge import merge
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 
@@ -16,6 +16,9 @@ _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self._route_points = []
+        self._activity_points = []
 
         # gettext seems bit too complex
         self._translator = Translator("ui")
@@ -49,6 +52,7 @@ class MainWindow(QMainWindow):
         dialog.setNameFilter(self.tr("nameFilterActivity") + " (*.fit *.fit.zip)")
         if dialog.exec_():
             self.ui.inputActivitySelect.setText(dialog.selectedFiles()[0])
+            self.on_activity_select()
 
     def on_select_route_click(self):
         dialog = QFileDialog(self)
@@ -57,13 +61,49 @@ class MainWindow(QMainWindow):
         dialog.setNameFilter(self.tr("nameFilterRoute") + " (*.gpx)")
         if dialog.exec_():
             self.ui.inputRouteSelect.setText(dialog.selectedFiles()[0])
+            self.on_route_select()
 
-    def on_submit(self):
-        worker = MergeWorker(self.ui.inputRouteSelect.text(), self.ui.inputActivitySelect.text(), self.precision)
-        worker.signals.result.connect(self._on_finish_merge)
-
+    def _block_buttons(self):
         self.ui.buttonBox.blockSignals(True)
         self.ui.buttonBox.setEnabled(False)
+
+    def _unblock_buttons(self):
+        self.ui.buttonBox.blockSignals(False)
+        self.ui.buttonBox.setEnabled(True)
+
+    def on_route_select(self):
+        worker = LoadRouteWorker(self.ui.inputRouteSelect.text(), self.precision)
+        worker.signals.result.connect(self._on_load_route)
+
+        self._block_buttons()
+
+        self._threadpool.start(worker)
+
+    def _on_load_route(self, positions: list[PositionPoint]):
+        self.ui.labelRouteLen.setText(self._len_to_test(positions[-1].distance))
+        self._route_points = positions
+
+        self._unblock_buttons()
+
+    def on_activity_select(self):
+        worker = LoadActivityWorker(self.ui.inputActivitySelect.text())
+        worker.signals.result.connect(self._on_load_activity)
+
+        self._block_buttons()
+
+        self._threadpool.start(worker)
+
+    def _on_load_activity(self, points: list[DataPoint]):
+        self.ui.labelActivityLen.setText(self._len_to_test(points[-1].distance))
+        self._activity_points = points
+
+        self._unblock_buttons()
+
+    def on_submit(self):
+        worker = MergeWorker(self._route_points, self._activity_points, self.precision)
+        worker.signals.result.connect(self._on_finish_merge)
+
+        self._block_buttons()
 
         self._threadpool.start(worker)
 
@@ -80,13 +120,28 @@ class MainWindow(QMainWindow):
             export_as_tcx(points, dialog.selectedFiles()[0], ExportFields(**checkbox_dict))
 
         self._reset_input()
-        self.ui.buttonBox.blockSignals(False)
-        self.ui.buttonBox.setEnabled(True)
+        self._unblock_buttons()
 
     def _reset_input(self):
         self.ui.inputRouteSelect.setText("")
         self.ui.inputActivitySelect.setText("")
         self.ui.horizontalSlider.setSliderPosition(1)
+        self.ui.labelRouteLen.setText(self._len_to_test(0))
+        self.ui.labelRouteLen.setText(self._len_to_test(0))
+
+    def _len_to_test(self, length_meters: float):
+        km = int(length_meters / 1000)
+        m = round(length_meters % 1000)
+
+        parts = []
+
+        if km > 0:
+            parts.append(f"{km}{self.tr('km')}")
+
+        if m > 0 or km == 0:
+            parts.append(f"{m}{self.tr('m')}")
+
+        return " ".join(parts)
 
     def on_cancel(self):
         self._reset_input()
@@ -132,6 +187,10 @@ class MainWindow(QMainWindow):
     def _update_precision_value(self):
         self.ui.precisionValue.setText(str(self.precision))
 
+        if len(self._route_points) > 0:
+            # update distance with updated precision
+            self.on_route_select()
+
     def _translate_static(self):
         self.ui.buttonRouteSelect.setText(self.tr("btnRouteSelect"))
         self.ui.buttonActivitySelect.setText(self.tr("btnActivitySelect"))
@@ -139,22 +198,3 @@ class MainWindow(QMainWindow):
 
         for button in self.ui.buttonBox.buttons():
             button.setText(self.tr(button.text()))
-
-
-class WorkerSignals(QObject):
-    result = Signal(list)
-
-
-class MergeWorker(QRunnable):
-    """Worker thread"""
-
-    def __init__(self, route_path: str, recording_path: str, precision: float):
-        super().__init__()
-
-        self.args = (route_path, recording_path, precision)
-        self.signals = WorkerSignals()
-
-    @Slot()
-    def run(self):
-        result = merge(*self.args)
-        self.signals.result.emit(result)

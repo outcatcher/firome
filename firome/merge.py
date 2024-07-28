@@ -1,23 +1,11 @@
 import math
 
 from .classes.points import DataPoint, PositionPoint
-from .codecs.fit import parse_fit
-from .codecs.gpx import parse_gpx, interpolate
 
 
-def merge(route_path: str, recording_path: str, precision: float) -> list[DataPoint]:
-    """Merges positions into data recording"""
+def merge(position_elements: list[PositionPoint], data_elements: list[DataPoint], precision: float):
+    """Update data_elements points with position data"""
 
-    position_elements = interpolate(parse_gpx(route_path), precision)
-
-    data_elements = parse_fit(recording_path)
-
-    _merge(position_elements, data_elements, precision)
-
-    return data_elements
-
-
-def _merge(position_elements: list[PositionPoint], data_elements: list[DataPoint], precision: float):
     p_start = d_i = 0
 
     p_len = len(position_elements)
@@ -33,3 +21,5 @@ def _merge(position_elements: list[PositionPoint], data_elements: list[DataPoint
                 break
 
         d_i += 1
+
+    return data_elements
