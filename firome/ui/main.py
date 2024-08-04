@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLab
 
 from .main_ui import Ui_MainWindow
 from .main_workers import MergeWorker, LoadRouteWorker, LoadActivityWorker
+from .. import __version__
 from ..classes.export import ExportFields
 from ..classes.points import DataPoint, PositionPoint
 from ..codecs.tcx import export_as_tcx
@@ -29,6 +30,7 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle(f"Firome {__version__}")
 
         self.ui.buttonBox.accepted.connect(self.on_submit)
         self.ui.buttonBox.rejected.connect(self.on_cancel)

@@ -4,6 +4,7 @@ from lxml import etree
 from lxml.etree import ElementBase
 
 from .common import _with_ns, _time_format, _namespaces
+from ... import __version__
 from ...classes.export import ExportFields
 from ...classes.points import DataPoint
 
@@ -15,7 +16,7 @@ def export_as_tcx(points: list[DataPoint], destination: str, fields=ExportFields
         etree.QName(
             "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation"
         ): "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
-        "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+           "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
     }
     root: ElementBase = etree.Element(_with_ns("TrainingCenterDatabase"), root_attrs, nsmap=_namespaces)
 
@@ -27,7 +28,7 @@ def export_as_tcx(points: list[DataPoint], destination: str, fields=ExportFields
     activity_id.text = start_ts
 
     notes = etree.SubElement(activity, _with_ns("Notes"))
-    notes.text = "Merged by firome"
+    notes.text = f"Merged by firome {__version__}"
 
     lap_i = 0
     lap_track = None
