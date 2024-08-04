@@ -125,9 +125,11 @@ class MainWindow(QMainWindow):
     def _reset_input(self):
         self.ui.inputRouteSelect.setText("")
         self.ui.inputActivitySelect.setText("")
+
         self.ui.horizontalSlider.setSliderPosition(1)
+
         self.ui.labelRouteLen.setText(self._len_to_test(0))
-        self.ui.labelRouteLen.setText(self._len_to_test(0))
+        self.ui.labelActivityLen.setText(self._len_to_test(0))
 
     def _len_to_test(self, length_meters: float):
         km = int(length_meters / 1000)
