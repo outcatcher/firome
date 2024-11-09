@@ -118,7 +118,7 @@ def __gpx_remove_duplicates(gpx_data: _GPXData) -> _GPXData:
     if len(i_dist) == len(gpx_dist):
         return gpx_data
 
-    gpx_data_nodup = dict.fromkeys(_fields, [])
+    gpx_data_nodup = {fld: [] for fld in _fields}
 
     for k in _fields:
         gpx_data_nodup[k] = [gpx_data[k][i] for i in i_dist] if gpx_data[k] else None

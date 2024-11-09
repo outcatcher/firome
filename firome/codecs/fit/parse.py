@@ -107,10 +107,7 @@ def _ts_ok(prev, curr, nxt):
     if (curr > nxt) and (nxt >= prev):
         return False
 
-    if (curr - prev).days > 0:
-        return False
-
-    return True
+    return (curr - prev).days < 0
 
 
 def _fix_ts(current: datetime, normal_previous: datetime, next_ts: datetime) -> datetime:
