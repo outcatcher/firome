@@ -1,8 +1,10 @@
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 
 
 @dataclass
 class ExportFields:
+    """Exported data fields."""
+
     altitude: bool = False
     distance: bool = True
     heart_rate: bool = True
@@ -12,4 +14,5 @@ class ExportFields:
 
     @classmethod
     def list_fields(cls):
+        """List of field names."""
         return asdict(cls()).keys()

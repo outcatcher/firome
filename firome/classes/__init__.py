@@ -1,1 +1,1 @@
-"""Shared objects"""
+"""Shared objects."""

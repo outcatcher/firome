@@ -1,16 +1,17 @@
 from datetime import datetime, timezone
 
-from fitdecode import FitReader, FitDataMessage, FIT_FRAME_DATA
+from fitdecode import FIT_FRAME_DATA, FitDataMessage, FitReader
 
-from ..errors import UnsupportedFileExtError
-from ..zip import unzip
 from ...classes.points import DataPoint
 from ...logger import LOGGER
+from ..errors import UnsupportedFileExtError
+from ..zip import unzip
 
 __max_delta_days = 120  # expected activity date range from now
 
 
 def parse_fit(src: str) -> list[DataPoint]:
+    """Parse FIT file by given path."""
     if src.lower().endswith(".zip"):
         src = unzip(src)
 
@@ -18,12 +19,14 @@ def parse_fit(src: str) -> list[DataPoint]:
         raise UnsupportedFileExtError(src)
 
     with FitReader(src) as fit:
-        result = __FitParser(fit).process()
+        return FitParser(fit).process()
 
-    return result
+class FitParserRecreatedError(Exception):
+    """__FitParser был создан второй раз."""
 
+class FitParser:
+    """FIT file parser."""
 
-class __FitParser:
     def __init__(self, reader: FitReader):
         self._lap = 1  # track increasing lap value
         self._fit = reader
@@ -31,8 +34,9 @@ class __FitParser:
         self._reference_date = None
 
     def process(self):
+        """Execute FIT file processing."""
         if self._closed:
-            raise Exception("__FitParser reused")
+            raise FitParserRecreatedError
 
         result = []
 
@@ -63,7 +67,7 @@ class __FitParser:
 
         for i in range(1, len(points) - 1):
             if not _ts_ok(points[i - 1].timestamp, points[i].timestamp, points[i + 1].timestamp):
-                err_index.append(i)  # not mutating slice during iteration
+                err_index.append(i)  # not mutating slice during iteration  # noqa:PERF401  # too complex
 
         if size := len(err_index):
             LOGGER.error("found %d broken timestamps in activity", size)
@@ -103,10 +107,7 @@ def _ts_ok(prev, curr, nxt):
     if (curr > nxt) and (nxt >= prev):
         return False
 
-    if (curr - prev).days > 0:
-        return False
-
-    return True
+    return (curr - prev).days < 0
 
 
 def _fix_ts(current: datetime, normal_previous: datetime, next_ts: datetime) -> datetime:

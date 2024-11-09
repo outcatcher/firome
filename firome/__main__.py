@@ -14,7 +14,7 @@ def __no_prio_args():
 
 
 parser = argparse.ArgumentParser(
-    description="Combines GPX file with training data with GPX file with position data based on the distance"
+    description="Combines GPX file with training data with GPX file with position data based on the distance",
 )
 parser.add_argument("--route", type=str, required=__no_prio_args(),
                     help="Path to GPX file with route of the training")
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.version:
-        print(__version__)
+        print(__version__)  # noqa: T201  # not for debug
         sys.exit(0)
 
     LOGGER.info("route: %s", args.route)
