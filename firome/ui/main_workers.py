@@ -8,7 +8,7 @@ from ..merge import merge
 
 class WorkerSignals(QObject):
     """Signals supported by worker."""
-    
+
     result = Signal(list)
 
 
