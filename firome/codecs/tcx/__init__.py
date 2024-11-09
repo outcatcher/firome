@@ -1,4 +1,4 @@
-"""TCX file operations"""
+"""TCX file operations."""
 
 from .export import export_as_tcx
 

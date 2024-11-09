@@ -4,8 +4,7 @@ from .classes.points import DataPoint, PositionPoint
 
 
 def merge(position_elements: list[PositionPoint], data_elements: list[DataPoint], precision: float):
-    """Update data_elements points with position data"""
-
+    """Update data_elements points with position data."""
     p_start = d_i = 0
 
     p_len = len(position_elements)

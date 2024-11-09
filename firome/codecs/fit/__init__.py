@@ -1,4 +1,4 @@
-"""FIT file operations"""
+"""FIT file operations."""
 
 from .parse import parse_fit
 

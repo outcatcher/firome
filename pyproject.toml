@@ -2,17 +2,37 @@
 name = "firome"
 dynamic = ["version"]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
+requires-python = ">= 3.10"
 
 [tool.setuptools.dynamic]
-version = {attr = "firome.__version__"}
+version = { attr = "firome.__version__" }
 
 [tool.ruff]
 line-length = 120
 exclude = ["firome/ui/main_ui.py"] # generated
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN",    # disable annotation checks, they're optional and decision is up to developer
+    "TID252", # I personally like relative imports
+    "D107",   # don't want to document each __init__
+    "D203",   # ether this or D211
+    "D213",   # ether this or D212
+    "D100",   # ignore module docstring
+    "D104",   # ignore package docstring
+    "FIX002", # todos are fine
+    "TD003",  # not using issues that much
+]
 
 [tool.ruff.format]
 quote-style = "double"
 line-ending = "lf"
 indent-style = "space"
 exclude = ["firome/ui/main_ui.py"] # generated
+
+[tool.autopep8]
+max_line_length = 120
+in-place = true
+recursive = true

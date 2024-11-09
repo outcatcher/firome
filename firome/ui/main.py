@@ -1,20 +1,22 @@
 import time
 
 from PySide6.QtCore import QThreadPool
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QSlider, QCheckBox, QLabel
+from PySide6.QtWidgets import QCheckBox, QFileDialog, QLabel, QMainWindow, QSlider
 
-from .main_ui import Ui_MainWindow
-from .main_workers import MergeWorker, LoadRouteWorker, LoadActivityWorker
 from .. import __version__
 from ..classes.export import ExportFields
 from ..classes.points import DataPoint, PositionPoint
 from ..codecs.tcx import export_as_tcx
 from ..i18n import Translator
+from .main_ui import Ui_MainWindow
+from .main_workers import LoadActivityWorker, LoadRouteWorker, MergeWorker
 
 _precision_positions = (0.5, 1.0, 2.0, 3.0, 4.0, 5.0)
 
 
 class MainWindow(QMainWindow):
+    """Main application window."""
+
     def __init__(self):
         super().__init__()
 
@@ -32,11 +34,11 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setWindowTitle(f"Firome {__version__}")
 
-        self.ui.buttonBox.accepted.connect(self.on_submit)
-        self.ui.buttonBox.rejected.connect(self.on_cancel)
+        self.ui.buttonBox.accepted.connect(self._on_submit)
+        self.ui.buttonBox.rejected.connect(self._on_cancel)
 
-        self.ui.buttonRouteSelect.clicked.connect(self.on_select_route_click)
-        self.ui.buttonActivitySelect.clicked.connect(self.on_select_activity_click)
+        self.ui.buttonRouteSelect.clicked.connect(self._on_select_route_click)
+        self.ui.buttonActivitySelect.clicked.connect(self._on_select_activity_click)
 
         self._init_precision_slider()
 
@@ -45,36 +47,37 @@ class MainWindow(QMainWindow):
         self._translate_static()
 
     def tr(self, msg, *_):
+        """Translate given message."""
         return self._translator.translate(msg)
 
-    def on_select_activity_click(self):
+    def _on_select_activity_click(self):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
         dialog.setNameFilter(self.tr("nameFilterActivity") + " (*.fit *.fit.zip)")
         if dialog.exec_():
             self.ui.inputActivitySelect.setText(dialog.selectedFiles()[0])
-            self.on_activity_select()
+            self._on_activity_select()
 
-    def on_select_route_click(self):
+    def _on_select_route_click(self):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
         dialog.setNameFilter(self.tr("nameFilterRoute") + " (*.gpx)")
         if dialog.exec_():
             self.ui.inputRouteSelect.setText(dialog.selectedFiles()[0])
-            self.on_route_select()
+            self._on_route_select()
 
     def _block_buttons(self):
-        self.ui.buttonBox.blockSignals(True)
+        self.ui.buttonBox.blockSignals(True) #noqa:FBT003 # boolead is the only argument
         self.ui.buttonBox.setEnabled(False)
 
     def _unblock_buttons(self):
-        self.ui.buttonBox.blockSignals(False)
+        self.ui.buttonBox.blockSignals(False) #noqa:FBT003 # boolead is the only argument
         self.ui.buttonBox.setEnabled(True)
 
-    def on_route_select(self):
-        worker = LoadRouteWorker(self.ui.inputRouteSelect.text(), self.precision)
+    def _on_route_select(self):
+        worker = LoadRouteWorker(self.ui.inputRouteSelect.text(), self._precision)
         worker.signals.result.connect(self._on_load_route)
 
         self._block_buttons()
@@ -87,7 +90,7 @@ class MainWindow(QMainWindow):
 
         self._unblock_buttons()
 
-    def on_activity_select(self):
+    def _on_activity_select(self):
         worker = LoadActivityWorker(self.ui.inputActivitySelect.text())
         worker.signals.result.connect(self._on_load_activity)
 
@@ -101,8 +104,8 @@ class MainWindow(QMainWindow):
 
         self._unblock_buttons()
 
-    def on_submit(self):
-        worker = MergeWorker(self._route_points, self._activity_points, self.precision)
+    def _on_submit(self):
+        worker = MergeWorker(self._route_points, self._activity_points, self._precision)
         worker.signals.result.connect(self._on_finish_merge)
 
         self._block_buttons()
@@ -147,7 +150,7 @@ class MainWindow(QMainWindow):
 
         return " ".join(parts)
 
-    def on_cancel(self):
+    def _on_cancel(self):
         self._reset_input()
 
     def _init_precision_slider(self):
@@ -172,7 +175,7 @@ class MainWindow(QMainWindow):
 
         for field in ExportFields.list_fields():
             checkbox = QCheckBox(self.tr(field), self)
-            checkbox.stateChanged.connect(lambda v: self._set_export_field(field, bool(v)))
+            checkbox.stateChanged.connect(self._handle_set_export_field)
             checkbox.setChecked(True)
 
             layout.addWidget(checkbox)
@@ -181,19 +184,22 @@ class MainWindow(QMainWindow):
 
         return checkbox_values
 
-    def _set_export_field(self, name: str, value: bool):
-        setattr(self._export_fields, name, value)
+    def _handle_set_export_field(self, name: str):
+        def _set_export_field(value):
+            setattr(self._export_fields, name, bool(value))
+
+        return _set_export_field
 
     @property
-    def precision(self) -> float:
+    def _precision(self) -> float:
         return _precision_positions[self.ui.horizontalSlider.sliderPosition()]
 
     def _update_precision_value(self):
-        self.ui.precisionValue.setText(str(self.precision))
+        self.ui.precisionValue.setText(str(self._precision))
 
         if len(self._route_points) > 0:
             # update distance with updated precision
-            self.on_route_select()
+            self._on_route_select()
 
     def _translate_static(self):
         self.ui.buttonRouteSelect.setText(self.tr("btnRouteSelect"))

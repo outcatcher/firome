@@ -1,6 +1,6 @@
 import locale
 from configparser import ConfigParser
-from os import path
+from pathlib import Path
 
 
 def _locale_name():
@@ -13,14 +13,15 @@ def _locale_name():
 
 
 class Translator:
-    """Translator handling translations to language detected from system"""
+    """Translator handling translations to language detected from system."""
 
     def __init__(self, domain: str):
-        tr_path = path.abspath(path.join(path.dirname(__file__), "assets", domain + ".ini"))
+        tr_path = (Path(__file__).parent / "assets" / domain + ".ini").resolve()
 
         cfg = ConfigParser()
         cfg.read(tr_path, encoding="utf-8")
         self.translations = cfg[_locale_name()]
 
     def translate(self, key: str) -> str:
+        """Выполняет перевод по ключу."""
         return self.translations.get(key, str(key))

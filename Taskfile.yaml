@@ -42,6 +42,12 @@ tasks:
       - pip install ruff  # TODO: use tox or other dependency splitting
     cmds:
       - ruff check
+  
+  lint-fix:
+    preconditions:
+      - pip install ruff  # TODO: use tox or other dependency splitting
+    cmds:
+      - ruff check --fix
 
   format:
     preconditions:

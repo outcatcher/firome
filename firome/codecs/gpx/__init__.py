@@ -1,6 +1,6 @@
-"""GPX file operations"""
+"""GPX file operations."""
 
-from .parse import parse_gpx
 from .interpolate import interpolate
+from .parse import parse_gpx
 
 __all__ = ["parse_gpx", "interpolate"]

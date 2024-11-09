@@ -1,15 +1,14 @@
-from typing import Optional
-
 from geopy.distance import geodesic
 from lxml import etree
 
+from ...classes.points import Position, PositionPoint
 from ..errors import UnsupportedFileExtError
 from ..xml import add_ns
 from ..zip import unzip
-from ...classes.points import Position, PositionPoint
 
 
 def parse_gpx(src: str) -> list[PositionPoint]:
+    """Parse GPX file by given path."""
     if src.lower().endswith(".zip"):
         src = unzip(src)
 
@@ -18,12 +17,12 @@ def parse_gpx(src: str) -> list[PositionPoint]:
 
     result = []
 
-    root: etree.ElementBase = etree.parse(src).getroot()
+    root: etree.ElementBase = etree.parse(src).getroot()  # noqa:S320  # локальное приложение
 
     default_ns = root.nsmap[None]
 
     track_points: list[etree.ElementBase] = root.findall(
-        "./" + add_ns("trk", default_ns) + "/" + add_ns("trkseg", default_ns) + "/" + add_ns("trkpt", default_ns)
+        "./" + add_ns("trk", default_ns) + "/" + add_ns("trkseg", default_ns) + "/" + add_ns("trkpt", default_ns),
     )
 
     prev = None
@@ -45,7 +44,7 @@ def parse_gpx(src: str) -> list[PositionPoint]:
     return result
 
 
-def __total_distance(current: Position, previous: Optional[PositionPoint]) -> float:
+def __total_distance(current: Position, previous: PositionPoint | None) -> float:
     if previous is None:
         return 0
 

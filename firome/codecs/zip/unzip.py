@@ -1,13 +1,12 @@
 import tempfile
 import zipfile
-from os import path
+from pathlib import Path
 
 from .errors import EmptyArchiveError, MultipleFilesError
 
 
 def unzip(src: str) -> str:
-    """Unzip source archive returning path of extracted file"""
-
+    """Unzip source archive returning path of extracted file."""
     tmp_dir = tempfile.mkdtemp(prefix="firome-")
 
     with zipfile.ZipFile(src) as archive:
@@ -21,4 +20,4 @@ def unzip(src: str) -> str:
 
         archive.extractall(path=tmp_dir)
 
-    return path.abspath(path.join(tmp_dir, filename))
+    return Path(tmp_dir, filename).resolve()

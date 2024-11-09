@@ -1,5 +1,5 @@
-"""Common codec errors"""
+"""Common codec errors."""
 
 
 class UnsupportedFileExtError(Exception):
-    """Unsupported file extension"""
+    """Unsupported file extension."""

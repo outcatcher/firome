@@ -1,22 +1,29 @@
 from datetime import timezone
+from typing import TYPE_CHECKING
 
 from lxml import etree
-from lxml.etree import ElementBase
 
-from .common import _with_ns, _time_format, _namespaces
 from ... import __version__
 from ...classes.export import ExportFields
 from ...classes.points import DataPoint
+from .common import _namespaces, _time_format, _with_ns
+
+if TYPE_CHECKING:
+    from lxml.etree import ElementBase
 
 
-def export_as_tcx(points: list[DataPoint], destination: str, fields=ExportFields()):
+def export_as_tcx(points: list[DataPoint], destination: str, fields=None):
+    """Export data points to TCX file."""
+    if fields is None:
+        fields = ExportFields()
+
     start_ts = points[0].timestamp.strftime(_time_format)
 
     root_attrs = {
         etree.QName(
-            "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation"
+            "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
         ): "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
-           "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+           "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
     }
     root: ElementBase = etree.Element(_with_ns("TrainingCenterDatabase"), root_attrs, nsmap=_namespaces)
 
@@ -56,13 +63,11 @@ def _new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
     lap_trigger_method = etree.SubElement(lap, _with_ns("TriggerMethod"))
     lap_trigger_method.text = "Manual"
 
-    lap_track = etree.SubElement(lap, _with_ns("Track"))
-
-    return lap_track
+    return etree.SubElement(lap, _with_ns("Track"))
 
 
 def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: ExportFields) -> etree.ElementBase:
-    """Trackpoint example
+    """Trackpoint example.
 
     <Trackpoint>
       <Time>2014-11-30T05:51:36Z</Time>

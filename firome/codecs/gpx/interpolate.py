@@ -22,33 +22,28 @@
 #
 # Original implementation:
 # https://github.com/remisalmon/gpx-interpolate/blob/00af3c636d566d049f6a140c093af4e91d0482d5/gpx_interpolate.py
-from typing import Dict, List, Union
-
 import numpy as np
 from scipy.interpolate import pchip_interpolate
 
-from firome.logger import LOGGER
 from firome.classes.points import PositionPoint
+from firome.logger import LOGGER
 
 # classes
-_GPXData = Dict[str, Union[List[float], None]]
+_GPXData = dict[str, list[float] | None]
 
 # globals
 _EARTH_RADIUS = 6371e3  # meters
-_EPS = 1e-6  # seconds
 
 _fields = ("lat", "lon", "ele", "dist")
 
 
 def interpolate(track: list[PositionPoint], resolution: float) -> list[PositionPoint]:
-    """
-    Interpolates track with given resolution (m)
-    """
+    """Interpolate track with given resolution (m)."""
     gpx_data = __from_track(track)
     gpx_data_nodup = __gpx_remove_duplicates(gpx_data)
 
-    if not len(gpx_data_nodup["lat"]) == len(gpx_data["lat"]):
-        LOGGER.warn("Removed {} duplicate trackpoint(s)".format(len(gpx_data["lat"]) - len(gpx_data_nodup["lat"])))
+    if len(gpx_data_nodup["lat"]) != len(gpx_data["lat"]):
+        LOGGER.warning("Removed {} duplicate trackpoint(s)".format(len(gpx_data["lat"]) - len(gpx_data_nodup["lat"])))
 
     gpx_data_interp = __gpx_interpolate(gpx_data_nodup, resolution)
 
@@ -56,12 +51,10 @@ def interpolate(track: list[PositionPoint], resolution: float) -> list[PositionP
 
 
 def __gpx_interpolate(gpx_data: _GPXData, res: float = 5.0) -> _GPXData:
-    """
-    Returns gpx_data interpolated with a spatial resolution res using piecewise cubic Hermite splines.
+    """Return gpx_data interpolated with a spatial resolution res using piecewise cubic Hermite splines.
 
-    if num is passed, gpx_data is interpolated to num points and res is ignored.
+    If num is passed, gpx_data is interpolated to num points and res is ignored.
     """
-
     if all(gpx_data[i] in (None, []) for i in _fields):
         return gpx_data
 
@@ -76,23 +69,19 @@ def __gpx_interpolate(gpx_data: _GPXData, res: float = 5.0) -> _GPXData:
     x = np.linspace(xi[0], xi[-1], num=num, endpoint=True)
     y = pchip_interpolate(xi, yi, x, axis=1)
 
-    gpx_data_interp = {
+    return {
         "lat": list(y[0, :]),
         "lon": list(y[1, :]),
         "ele": list(y[2, :]) if gpx_data["ele"] else None,
         "dist": list(y[3, :]),
     }
 
-    return gpx_data_interp
 
-
-def __gpx_calculate_distance(gpx_data: _GPXData, use_ele: bool = True) -> List[float]:
-    """
-    Returns the distance between GPX trackpoints.
+def __gpx_calculate_distance(gpx_data: _GPXData, *, use_ele: bool = True) -> list[float]:
+    """Return the distance between GPX trackpoints.
 
     if use_ele is True and gpx_data['ele'] is not None, the elevation data is used to compute the distance.
     """
-
     gpx_dist = np.zeros(len(gpx_data["lat"]))
 
     for i in range(len(gpx_dist) - 1):
@@ -105,7 +94,7 @@ def __gpx_calculate_distance(gpx_data: _GPXData, use_ele: bool = True) -> List[f
         delta_lon = lon2 - lon1
 
         c = 2.0 * np.arcsin(
-            np.sqrt(np.sin(delta_lat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(delta_lon / 2.0) ** 2)
+            np.sqrt(np.sin(delta_lat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(delta_lon / 2.0) ** 2),
         )  # haversine formula
 
         dist_latlon = _EARTH_RADIUS * c  # great-circle distance
@@ -121,10 +110,7 @@ def __gpx_calculate_distance(gpx_data: _GPXData, use_ele: bool = True) -> List[f
 
 
 def __gpx_remove_duplicates(gpx_data: _GPXData) -> _GPXData:
-    """
-    Returns gpx_data where duplicate trackpoints are removed.
-    """
-
+    """Return gpx_data where duplicate trackpoints are removed."""
     gpx_dist = __gpx_calculate_distance(gpx_data, use_ele=False)
 
     i_dist = np.concatenate(([0], np.nonzero(gpx_dist)[0]))  # keep gpx_dist[0] = 0.0
@@ -141,10 +127,7 @@ def __gpx_remove_duplicates(gpx_data: _GPXData) -> _GPXData:
 
 
 def __from_track(track: list[PositionPoint]) -> _GPXData:
-    """
-    Returns a GPXData structure from a GPX file.
-    """
-
+    """Return a GPXData structure from a GPX file."""
     # for some reason `dict.fromkeys(_fields, [])` not working, scipy tries to allocate a lot of data (40G+)
     gpx_data = {"lat": [], "lon": [], "ele": [], "dist": []}
 

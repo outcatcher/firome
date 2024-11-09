@@ -6,6 +6,8 @@ Position = tuple[float, float]
 
 @dataclass
 class DataPoint:
+    """Single activity data point."""
+
     timestamp: datetime = None
     speed: float = None
     power: int = None
@@ -20,6 +22,8 @@ class DataPoint:
 
 @dataclass
 class PositionPoint:
+    """Single position point."""
+
     position: Position
     distance: float
     elevation: float
