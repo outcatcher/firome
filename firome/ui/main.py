@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QCheckBox, QFileDialog, QLabel, QMainWindow, QSlider
@@ -46,7 +47,7 @@ class MainWindow(QMainWindow):
 
         self._translate_static()
 
-    def tr(self, msg, *_):
+    def t(self, msg, *_):
         """Translate given message."""
         return self._translator.translate(msg)
 
@@ -54,7 +55,7 @@ class MainWindow(QMainWindow):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter(self.tr("nameFilterActivity") + " (*.fit *.fit.zip)")
+        dialog.setNameFilter(self.t("nameFilterActivity") + " (*.fit *.fit.zip)")
         if dialog.exec_():
             self.ui.inputActivitySelect.setText(dialog.selectedFiles()[0])
             self._on_activity_select()
@@ -63,7 +64,7 @@ class MainWindow(QMainWindow):
         dialog = QFileDialog(self)
         dialog.setFileMode(dialog.FileMode.ExistingFile)
         dialog.setAcceptMode(dialog.AcceptMode.AcceptOpen)
-        dialog.setNameFilter(self.tr("nameFilterRoute") + " (*.gpx)")
+        dialog.setNameFilter(self.t("nameFilterRoute") + " (*.gpx)")
         if dialog.exec_():
             self.ui.inputRouteSelect.setText(dialog.selectedFiles()[0])
             self._on_route_select()
@@ -77,7 +78,7 @@ class MainWindow(QMainWindow):
         self.ui.buttonBox.setEnabled(True)
 
     def _on_route_select(self):
-        worker = LoadRouteWorker(self.ui.inputRouteSelect.text(), self._precision)
+        worker = LoadRouteWorker(Path(self.ui.inputRouteSelect.text()), self._precision)
         worker.signals.result.connect(self._on_load_route)
 
         self._block_buttons()
@@ -91,7 +92,7 @@ class MainWindow(QMainWindow):
         self._unblock_buttons()
 
     def _on_activity_select(self):
-        worker = LoadActivityWorker(self.ui.inputActivitySelect.text())
+        worker = LoadActivityWorker(Path(self.ui.inputActivitySelect.text()))
         worker.signals.result.connect(self._on_load_activity)
 
         self._block_buttons()
@@ -143,10 +144,10 @@ class MainWindow(QMainWindow):
         parts = []
 
         if km > 0:
-            parts.append(f"{km}{self.tr('km')}")
+            parts.append(f"{km}{self.t('km')}")
 
         if m > 0 or km == 0:
-            parts.append(f"{m}{self.tr('m')}")
+            parts.append(f"{m}{self.t('m')}")
 
         return " ".join(parts)
 
@@ -171,10 +172,10 @@ class MainWindow(QMainWindow):
 
         layout = self.ui.checkboxLayout
 
-        layout.addWidget(QLabel(self.tr("labelSelectExportedList")))
+        layout.addWidget(QLabel(self.t("labelSelectExportedList")))
 
         for field in ExportFields.list_fields():
-            checkbox = QCheckBox(self.tr(field), self)
+            checkbox = QCheckBox(self.t(field), self)
             checkbox.stateChanged.connect(self._handle_set_export_field)
             checkbox.setChecked(True)
 
@@ -202,9 +203,9 @@ class MainWindow(QMainWindow):
             self._on_route_select()
 
     def _translate_static(self):
-        self.ui.buttonRouteSelect.setText(self.tr("btnRouteSelect"))
-        self.ui.buttonActivitySelect.setText(self.tr("btnActivitySelect"))
-        self.ui.precisionLabel.setText(self.tr("lblPrecision"))
+        self.ui.buttonRouteSelect.setText(self.t("btnRouteSelect"))
+        self.ui.buttonActivitySelect.setText(self.t("btnActivitySelect"))
+        self.ui.precisionLabel.setText(self.t("lblPrecision"))
 
         for button in self.ui.buttonBox.buttons():
-            button.setText(self.tr(button.text()))
+            button.setText(self.t(button.text()))

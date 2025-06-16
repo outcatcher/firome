@@ -25,16 +25,16 @@
 import numpy as np
 from scipy.interpolate import pchip_interpolate
 
-from firome.classes.points import PositionPoint
+from firome.classes.points import Position, PositionPoint
 from firome.logger import LOGGER
 
 # classes
-_GPXData = dict[str, list[float] | None]
+_GPXData = dict[str, list[float]]
 
 # globals
 _EARTH_RADIUS = 6371e3  # meters
 
-_fields = ("lat", "lon", "ele", "dist")
+_fields: tuple[str, str, str, str] = ("lat", "lon", "ele", "dist")
 
 
 def interpolate(track: list[PositionPoint], resolution: float) -> list[PositionPoint]:
@@ -121,7 +121,7 @@ def __gpx_remove_duplicates(gpx_data: _GPXData) -> _GPXData:
     gpx_data_nodup = {fld: [] for fld in _fields}
 
     for k in _fields:
-        gpx_data_nodup[k] = [gpx_data[k][i] for i in i_dist] if gpx_data[k] else None
+        gpx_data_nodup[k] = [gpx_data[k][i] for i in i_dist] if gpx_data[k] else []
 
     return gpx_data_nodup
 
@@ -132,8 +132,8 @@ def __from_track(track: list[PositionPoint]) -> _GPXData:
     gpx_data = {"lat": [], "lon": [], "ele": [], "dist": []}
 
     for point in track:
-        gpx_data["lat"].append(point.position[0])
-        gpx_data["lon"].append(point.position[1])
+        gpx_data["lat"].append(point.position.latitude)
+        gpx_data["lon"].append(point.position.longitude)
         gpx_data["ele"].append(point.elevation)
         gpx_data["dist"].append(point.distance)
 
@@ -152,7 +152,7 @@ def __to_track(gpx_data: _GPXData) -> list[PositionPoint]:
         dist = _ip_dist[i]
         ele = gpx_data["ele"][i] if gpx_data["ele"] else None
 
-        gpx_point = PositionPoint(position=(lat, lon), elevation=ele, distance=dist)
+        gpx_point = PositionPoint(position=Position(lat, lon), elevation=ele, distance=dist)
 
         gpx_track.append(gpx_point)
 

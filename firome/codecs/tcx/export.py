@@ -1,5 +1,4 @@
 from datetime import timezone
-from typing import TYPE_CHECKING
 
 from lxml import etree
 
@@ -8,14 +7,20 @@ from ...classes.export import ExportFields
 from ...classes.points import DataPoint
 from .common import _namespaces, _time_format, _with_ns
 
-if TYPE_CHECKING:
-    from lxml.etree import ElementBase
-
+no_points_error = "No points to export"
+first_point_missing_timestamp_error = "First point must have timestamp"
+no_base_element_error = "No base element"
 
 def export_as_tcx(points: list[DataPoint], destination: str, fields=None):
     """Export data points to TCX file."""
     if fields is None:
         fields = ExportFields()
+
+    if len(points) == 0:
+        raise ValueError(no_points_error)
+
+    if points[0].timestamp is None:
+        raise ValueError(first_point_missing_timestamp_error)
 
     start_ts = points[0].timestamp.strftime(_time_format)
 
@@ -25,7 +30,7 @@ def export_as_tcx(points: list[DataPoint], destination: str, fields=None):
         ): "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
            "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
     }
-    root: ElementBase = etree.Element(_with_ns("TrainingCenterDatabase"), root_attrs, nsmap=_namespaces)
+    root = etree.Element(_with_ns("TrainingCenterDatabase"), root_attrs, nsmap=_namespaces)
 
     activities = etree.SubElement(root, _with_ns("Activities"))
 
@@ -57,7 +62,7 @@ def export_as_tcx(points: list[DataPoint], destination: str, fields=None):
     root.getroottree().write(destination, encoding="utf-8", xml_declaration=True)
 
 
-def _new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
+def _new_lap(activity: etree._Element, start_ts: str) -> etree._Element:
     lap = etree.SubElement(activity, _with_ns("Lap"), {"StartTime": start_ts})
 
     lap_trigger_method = etree.SubElement(lap, _with_ns("TriggerMethod"))
@@ -66,7 +71,7 @@ def _new_lap(activity: etree.ElementBase, start_ts: str) -> etree.ElementBase:
     return etree.SubElement(lap, _with_ns("Track"))
 
 
-def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: ExportFields) -> etree.ElementBase:
+def _append_point(point: DataPoint, base_element: etree._Element | None, fields: ExportFields) -> etree._Element:
     """Trackpoint example.
 
     <Trackpoint>
@@ -89,11 +94,16 @@ def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: Exp
       </Extensions>
     </Trackpoint>
     """
+    if base_element is None:
+        raise ValueError(no_base_element_error)
+
     result = etree.SubElement(base_element, _with_ns("Trackpoint"))
 
     # <Time>2014-11-30T05:51:36Z</Time>
     p_time = etree.SubElement(result, _with_ns("Time"))
-    p_time.text = point.timestamp.astimezone(timezone.utc).strftime(_time_format)
+
+    if point.timestamp is not None:
+        p_time.text = point.timestamp.astimezone(timezone.utc).strftime(_time_format)
 
     #   <Position>
     #     <LatitudeDegrees>51.791013</LatitudeDegrees>
@@ -103,9 +113,9 @@ def _append_point(point: DataPoint, base_element: etree.ElementBase, fields: Exp
     if point.position is not None:
         p_position = etree.SubElement(result, _with_ns("Position"))
         p_pos_lat = etree.SubElement(p_position, _with_ns("LatitudeDegrees"))
-        p_pos_lat.text = str(point.position[0])
+        p_pos_lat.text = str(point.position.latitude)
         p_pos_lon = etree.SubElement(p_position, _with_ns("LongitudeDegrees"))
-        p_pos_lon.text = str(point.position[1])
+        p_pos_lon.text = str(point.position.longitude)
 
     #  <AltitudeMeters>152</AltitudeMeters>
     if fields.altitude and point.elevation is not None:

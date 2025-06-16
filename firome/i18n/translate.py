@@ -16,7 +16,7 @@ class Translator:
     """Translator handling translations to language detected from system."""
 
     def __init__(self, domain: str):
-        tr_path = (Path(__file__).parent / "assets" / domain + ".ini").resolve()
+        tr_path = (Path(__file__).parent / "assets" / domain).with_suffix(".ini").resolve()
 
         cfg = ConfigParser()
         cfg.read(tr_path, encoding="utf-8")

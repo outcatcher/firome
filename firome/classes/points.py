@@ -1,23 +1,28 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-Position = tuple[float, float]
 
+@dataclass
+class Position:
+    """GPS position."""
+
+    latitude: float
+    longitude: float
 
 @dataclass
 class DataPoint:
     """Single activity data point."""
 
-    timestamp: datetime = None
-    speed: float = None
-    power: int = None
-    heart_rate: int = None
-    cadence: int = None
-    lap: int = None
+    timestamp: datetime | None = None
+    speed: float | None = None
+    power: int | None = None
+    heart_rate: int | None = None
+    cadence: int | None = None
+    lap: int | None = None
 
-    position: Position = None
+    position: Position | None = None
     distance: float = 0
-    elevation: float = None
+    elevation: float | None = None
 
 
 @dataclass
@@ -26,4 +31,4 @@ class PositionPoint:
 
     position: Position
     distance: float
-    elevation: float
+    elevation: float | None = None

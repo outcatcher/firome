@@ -25,7 +25,7 @@ tasks:
     deps:
       - _prepare
     preconditions:
-      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+      - pip install pyinstaller # TODO: use tox or other dependency splitting
     cmds:
       - pyinstaller --onefile --console --name firome firome/__main__.py
 
@@ -33,24 +33,30 @@ tasks:
     deps:
       - _prepare
     preconditions:
-      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+      - pip install pyinstaller # TODO: use tox or other dependency splitting
     cmds:
       - pyinstaller --onefile --windowed --add-data "firome/i18n/assets/*.ini:firome/i18n/assets" --name firome-ui firome/ui/__main__.py
 
+  build-all:
+    cmds:
+      - task: build
+      - task: build-ui
+
   lint:
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff check
-  
-  lint-fix:
+      - pyright
+
+  lint:fix:
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff check --fix
 
   format:
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff format

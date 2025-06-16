@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import TypeVar
 
-from fitdecode import FIT_FRAME_DATA, FitDataMessage, FitReader
+from fitdecode import FIT_FRAME_DATA, FitCRC, FitDataMessage, FitDefinitionMessage, FitReader
 
 from ...classes.points import DataPoint
 from ...logger import LOGGER
@@ -10,12 +12,12 @@ from ..zip import unzip
 __max_delta_days = 120  # expected activity date range from now
 
 
-def parse_fit(src: str) -> list[DataPoint]:
+def parse_fit(src: Path) -> list[DataPoint]:
     """Parse FIT file by given path."""
-    if src.lower().endswith(".zip"):
+    if src.suffix == ".zip":
         src = unzip(src)
 
-    if not src.lower().endswith(".fit"):
+    if not src.suffix == ".fit":
         raise UnsupportedFileExtError(src)
 
     with FitReader(src) as fit:
@@ -23,6 +25,17 @@ def parse_fit(src: str) -> list[DataPoint]:
 
 class FitParserRecreatedError(Exception):
     """__FitParser был создан второй раз."""
+
+
+T = TypeVar('T')
+
+def _get_fit_data(data: FitDataMessage, field_name: str, fallback: T, py_type: type[T]) -> T:
+    value = data.get_value(field_name, py_type=py_type, fallback=fallback)
+
+    if not isinstance(value, py_type):
+        raise ValueError(f"field {field_name} is not {py_type.__name__}")
+
+    return value
 
 class FitParser:
     """FIT file parser."""
@@ -43,7 +56,7 @@ class FitParser:
         for data in self._fit:
             point = self.__frame_to_point(data)
 
-            if point is None or point.distance is None:
+            if point is None or point.distance is None or point.timestamp is None:
                 continue
 
             if point.timestamp.tzinfo is None:
@@ -53,7 +66,6 @@ class FitParser:
 
         self._closed = True
 
-        result.sort(key=lambda x: x.timestamp)
         result.sort(key=lambda x: x.distance)
 
         # expecting sorted list here
@@ -75,8 +87,8 @@ class FitParser:
         for idx in err_index:
             points[idx].timestamp = _fix_ts(points[idx].timestamp, points[idx - 1].timestamp, points[idx + 1].timestamp)
 
-    def __frame_to_point(self, data: FitDataMessage) -> DataPoint | None:
-        if data.frame_type != FIT_FRAME_DATA:
+    def __frame_to_point(self, data: FitDefinitionMessage | FitDataMessage | FitCRC) -> DataPoint | None:
+        if isinstance(data, FitDefinitionMessage) or isinstance(data, FitCRC) or data.frame_type != FIT_FRAME_DATA:
             return None
 
         if data.has_field("lap_trigger"):
@@ -89,12 +101,14 @@ class FitParser:
             return None
 
         return DataPoint(
-            timestamp=data.get_value("timestamp").replace(tzinfo=timezone.utc),
-            distance=data.get_value("distance"),
-            speed=data.get_value("speed", fallback=None),
-            power=data.get_value("power", fallback=None),
-            heart_rate=data.get_value("heart_rate", fallback=None),
-            cadence=data.get_value("cadence"),
+            timestamp=_get_fit_data(
+                data, "timestamp", fallback=datetime.now(), py_type=datetime,
+            ).replace(tzinfo=timezone.utc),
+            distance=_get_fit_data(data, "distance", fallback=0, py_type=float),
+            speed=_get_fit_data(data, "speed", fallback=0.0, py_type=float),
+            power=_get_fit_data(data, "power", fallback=0, py_type=int),
+            heart_rate=_get_fit_data(data, "heart_rate", fallback=0, py_type=int),
+            cadence=_get_fit_data(data, "cadence", fallback=0, py_type=int),
             lap=self._lap,
         )
 
@@ -104,7 +118,7 @@ def _ts_ok(prev, curr, nxt):
         return False
 
     # if next < prev, then next is broken
-    if (curr > nxt) and (nxt >= prev):
+    if (curr > nxt >= prev):
         return False
 
     return (curr - prev).days == 0
