@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QCheckBox, QFileDialog, QLabel, QMainWindow, QSlider
@@ -69,15 +70,15 @@ class MainWindow(QMainWindow):
             self._on_route_select()
 
     def _block_buttons(self):
-        self.ui.buttonBox.blockSignals(True) #noqa:FBT003 # boolead is the only argument
+        self.ui.buttonBox.blockSignals(True)  # noqa:FBT003 # boolean is the only argument
         self.ui.buttonBox.setEnabled(False)
 
     def _unblock_buttons(self):
-        self.ui.buttonBox.blockSignals(False) #noqa:FBT003 # boolead is the only argument
+        self.ui.buttonBox.blockSignals(False)  # noqa:FBT003 # boolean is the only argument
         self.ui.buttonBox.setEnabled(True)
 
     def _on_route_select(self):
-        worker = LoadRouteWorker(self.ui.inputRouteSelect.text(), self._precision)
+        worker = LoadRouteWorker(Path(self.ui.inputRouteSelect.text()), self._precision)
         worker.signals.result.connect(self._on_load_route)
 
         self._block_buttons()
@@ -91,7 +92,7 @@ class MainWindow(QMainWindow):
         self._unblock_buttons()
 
     def _on_activity_select(self):
-        worker = LoadActivityWorker(self.ui.inputActivitySelect.text())
+        worker = LoadActivityWorker(Path(self.ui.inputActivitySelect.text()))
         worker.signals.result.connect(self._on_load_activity)
 
         self._block_buttons()

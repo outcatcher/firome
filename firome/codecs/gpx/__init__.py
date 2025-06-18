@@ -3,4 +3,4 @@
 from .interpolate import interpolate
 from .parse import parse_gpx
 
-__all__ = ["parse_gpx", "interpolate"]
+__all__ = ["interpolate", "parse_gpx"]

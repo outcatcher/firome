@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from geopy.distance import geodesic
 from lxml import etree
 
@@ -7,17 +9,17 @@ from ..xml import add_ns
 from ..zip import unzip
 
 
-def parse_gpx(src: str) -> list[PositionPoint]:
+def parse_gpx(src: Path) -> list[PositionPoint]:
     """Parse GPX file by given path."""
-    if src.lower().endswith(".zip"):
+    if src.suffix.lower() == ".zip":
         src = unzip(src)
 
-    if not src.lower().endswith(".gpx"):
+    if not src.suffix.lower() == ".gpx":
         raise UnsupportedFileExtError(src)
 
     result = []
 
-    root: etree.ElementBase = etree.parse(src).getroot()  # noqa:S320  # локальное приложение
+    root: etree.ElementBase = etree.parse(src).getroot()  # локальное приложение
 
     default_ns = root.nsmap[None]
 

@@ -21,9 +21,10 @@ def export_as_tcx(points: list[DataPoint], destination: str, fields=None):
 
     root_attrs = {
         etree.QName(
-            "http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
+            "http://www.w3.org/2001/XMLSchema-instance",
+            "schemaLocation",
         ): "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2 "
-           "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
+        "http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
     }
     root: ElementBase = etree.Element(_with_ns("TrainingCenterDatabase"), root_attrs, nsmap=_namespaces)
 

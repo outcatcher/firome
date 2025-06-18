@@ -102,7 +102,7 @@ def __gpx_calculate_distance(gpx_data: _GPXData, *, use_ele: bool = True) -> lis
         if gpx_data["ele"] and use_ele:
             dist_ele = gpx_data["ele"][i + 1] - gpx_data["ele"][i]
 
-            gpx_dist[i + 1] = np.sqrt(dist_latlon ** 2 + dist_ele ** 2)
+            gpx_dist[i + 1] = np.sqrt(dist_latlon**2 + dist_ele**2)
         else:
             gpx_dist[i + 1] = dist_latlon
 

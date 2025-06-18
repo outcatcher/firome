@@ -5,7 +5,7 @@ from pathlib import Path
 from .errors import EmptyArchiveError, MultipleFilesError
 
 
-def unzip(src: str) -> str:
+def unzip(src: Path) -> Path:
     """Unzip source archive returning path of extracted file."""
     tmp_dir = tempfile.mkdtemp(prefix="firome-")
 

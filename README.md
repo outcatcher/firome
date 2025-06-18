@@ -5,6 +5,8 @@
 
 Точки маршрута привязываются к тренировке по расстоянию от начала пути.
 
+Автоматически исправляет неверные временные метки в файле активности.
+
 ## Использование
 
 [Пример результата](https://www.strava.com/activities/11471378450)
@@ -14,10 +16,11 @@
 ```shell
 > firome --route test/2024-05-21_1597851131.gpx --recording test/40B032FC.fit
 
-route: test/2024-05-21_1597851131.gpx
-recording: test/40B032FC.fit.zip
+route: /home/akachurin/Downloads/13.06.25.gpx
+recording: /home/akachurin/Downloads/42AE8F03.fit.zip
+found 16 broken timestamps in activity
 
-result: 1716922421.tcx
+result: 1750283535.tcx
 ```
 
 ### GUI
@@ -49,7 +52,6 @@ _Язык приложения зависит от языка системы_
 - Должен быть ZIP архивом
 - Должен содержать один файл с активностью/маршрутом
 - Дополнительно для UI:
-  - Поддерживаются только для фалов активности 
   - Должны иметь расширение `.fit.zip`
 
 
