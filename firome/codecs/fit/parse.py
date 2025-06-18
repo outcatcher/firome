@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fitdecode import FIT_FRAME_DATA, FitDataMessage, FitReader
 
@@ -10,19 +11,21 @@ from ..zip import unzip
 __max_delta_days = 120  # expected activity date range from now
 
 
-def parse_fit(src: str) -> list[DataPoint]:
+def parse_fit(src: Path) -> list[DataPoint]:
     """Parse FIT file by given path."""
-    if src.lower().endswith(".zip"):
+    if src.suffix.lower() == ".zip":
         src = unzip(src)
 
-    if not src.lower().endswith(".fit"):
+    if not src.suffix.lower() == ".fit":
         raise UnsupportedFileExtError(src)
 
     with FitReader(src) as fit:
         return FitParser(fit).process()
 
+
 class FitParserRecreatedError(Exception):
     """__FitParser был создан второй раз."""
+
 
 class FitParser:
     """FIT file parser."""
@@ -53,7 +56,6 @@ class FitParser:
 
         self._closed = True
 
-        result.sort(key=lambda x: x.timestamp)
         result.sort(key=lambda x: x.distance)
 
         # expecting sorted list here
@@ -104,7 +106,7 @@ def _ts_ok(prev, curr, nxt):
         return False
 
     # if next < prev, then next is broken
-    if (curr > nxt) and (nxt >= prev):
+    if curr > nxt >= prev:
         return False
 
     return (curr - prev).days == 0

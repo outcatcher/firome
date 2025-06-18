@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
 from ..classes.points import DataPoint, PositionPoint
@@ -15,7 +17,7 @@ class WorkerSignals(QObject):
 class LoadRouteWorker(QRunnable):
     """Loading and interpolating route."""
 
-    def __init__(self, route_path: str, precision: float):
+    def __init__(self, route_path: Path, precision: float):
         super().__init__()
 
         self.args = (route_path, precision)
@@ -33,7 +35,7 @@ class LoadRouteWorker(QRunnable):
 class LoadActivityWorker(QRunnable):
     """Loading activity."""
 
-    def __init__(self, activity_path: str):
+    def __init__(self, activity_path: Path):
         super().__init__()
 
         self.args = (activity_path,)
@@ -42,7 +44,7 @@ class LoadActivityWorker(QRunnable):
     @Slot()
     def run(self):
         """Execute activity loading."""
-        result = parse_fit(self.args[0])
+        result = parse_fit(Path(self.args[0]).resolve())
 
         self.signals.result.emit(result)
 

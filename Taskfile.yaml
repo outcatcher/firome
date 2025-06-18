@@ -2,55 +2,70 @@ version: "3"
 
 tasks:
   _prepare:
+    internal: true
     cmds:
       - pip install -r requirements.txt
 
   run:
+    desc: Run the CLI application
     deps:
       - _prepare
     cmds:
       - python -m firome {{.CLI_ARGS}}
 
   generate:
+    desc: Generate UI files
     cmds:
       - pyside6-uic firome/ui/assets/main.ui -o firome/ui/main_ui.py
 
   ui:
+    desc: Run the UI application
     deps:
       - _prepare
     cmds:
       - python -m firome.ui
 
-  build:
+  build:cli:
+    desc: Build the CLI application
     deps:
       - _prepare
     preconditions:
-      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+      - pip install pyinstaller # TODO: use tox or other dependency splitting
     cmds:
       - pyinstaller --onefile --console --name firome firome/__main__.py
 
-  build-ui:
+  build:ui:
+    desc: Build the UI application
     deps:
       - _prepare
     preconditions:
-      - pip install pyinstaller  # TODO: use tox or other dependency splitting
+      - pip install pyinstaller # TODO: use tox or other dependency splitting
     cmds:
       - pyinstaller --onefile --windowed --add-data "firome/i18n/assets/*.ini:firome/i18n/assets" --name firome-ui firome/ui/__main__.py
 
+  build:all:
+    desc: Build both the CLI and UI applications
+    deps:
+      - build:cli
+      - build:ui
+
   lint:
+    desc: Run the linter
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff check
-  
-  lint-fix:
+
+  lint:fix:
+    desc: Run the linter and fix issues
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff check --fix
 
   format:
+    desc: Run the formatter
     preconditions:
-      - pip install ruff  # TODO: use tox or other dependency splitting
+      - pip install ruff # TODO: use tox or other dependency splitting
     cmds:
       - ruff format

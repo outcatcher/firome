@@ -20,7 +20,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.version:
-        print(__version__) # noqa: T201  # не для дебага
+        print("Firome version:", __version__)  # noqa: T201  # не для дебага
+        print("Python version:", sys.version)  # noqa: T201  # не для дебага
         sys.exit(0)
 
     if args.debug:
